@@ -400,16 +400,16 @@ async function loadUserData() {
   if (!currentUser) return;
   showLoading(true);
   try {
-    // Load readings filtered by user_id
-    const {data: rData, error: rErr} = await sb.from("readings").select("*").eq("user_id", currentUser.id).order("date");
+    // Načti readings - bez filtru user_id (starší záznamy mohly být uloženy bez něj)
+    const {data: rData, error: rErr} = await sb.from("readings").select("*").order("date");
     if (rErr) { console.error("Readings load error:", rErr); }
     else if (rData && rData.length > 0) {
       readings = rData.map(r => ({
         id: r.id, date: r.date, value: parseFloat(r.value), note: r.note||""
       }));
     }
-    // Load netatmo days filtered by user_id
-    const {data: nData, error: nErr} = await sb.from("netatmo_days").select("*").eq("user_id", currentUser.id).order("date");
+    // Načti netatmo days - bez filtru user_id
+    const {data: nData, error: nErr} = await sb.from("netatmo_days").select("*").order("date");
     if (nErr) { console.error("Netatmo load error:", nErr); }
     else if (nData && nData.length > 0) {
       netatmoDays = nData.map(d => ({
