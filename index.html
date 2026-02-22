@@ -400,16 +400,18 @@ async function loadUserData() {
   if (!currentUser) return;
   showLoading(true);
   try {
-    // Load readings
-    const {data: rData, error: rErr} = await sb.from("readings").select("*").order("date");
-    if (!rErr && rData.length > 0) {
+    // Load readings filtered by user_id
+    const {data: rData, error: rErr} = await sb.from("readings").select("*").eq("user_id", currentUser.id).order("date");
+    if (rErr) { console.error("Readings load error:", rErr); }
+    else if (rData && rData.length > 0) {
       readings = rData.map(r => ({
         id: r.id, date: r.date, value: parseFloat(r.value), note: r.note||""
       }));
     }
-    // Load netatmo days
-    const {data: nData, error: nErr} = await sb.from("netatmo_days").select("*").order("date");
-    if (!nErr && nData.length > 0) {
+    // Load netatmo days filtered by user_id
+    const {data: nData, error: nErr} = await sb.from("netatmo_days").select("*").eq("user_id", currentUser.id).order("date");
+    if (nErr) { console.error("Netatmo load error:", nErr); }
+    else if (nData && nData.length > 0) {
       netatmoDays = nData.map(d => ({
         date: d.date, boilerOnSeconds: parseFloat(d.boiler_on_seconds),
         boilerOnHours: Math.round(parseFloat(d.boiler_on_seconds)/3600*10)/10,
@@ -543,10 +545,26 @@ document.getElementById("btnLogout").addEventListener("click", async (e) => {
   showAuth();
 });
 
-// Check existing session on load
+// Check existing session on load + listen for auth changes
 sb.auth.getSession().then(({ data: { session } }) => {
   if (session) { showApp(session.user); }
   else { showAuth(); renderAll(); }
+});
+
+// Reaktivni listener - zachyti prihlaseni/odhlaseni/refresh tokenu
+sb.auth.onAuthStateChange((event, session) => {
+  if (session && session.user) {
+    if (!currentUser || currentUser.id !== session.user.id) {
+      readings = []; netatmoDays = [];
+      showApp(session.user);
+    }
+  } else {
+    if (currentUser) {
+      readings = []; netatmoDays = [];
+      showAuth();
+      renderAll();
+    }
+  }
 });
 
 // ── DATA ─────────────────────────────────────────────────────────────────────
