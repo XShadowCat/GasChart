@@ -37,8 +37,8 @@ body.light .unit-btn.active{background:#d95f00;}
 .lang-toggle{display:flex;background:#161b22;border:1px solid #30363d;border-radius:6px;overflow:hidden;}
 body.light .lang-toggle{background:#f6f8fa;border-color:#b1bac4;}
 .lang-btn{padding:6px 10px;font-weight:700;font-size:12px;font-family:monospace;color:#6e7681;transition:all .15s;}
-.lang-btn.active{background:#30363d;color:#e6edf3;}
-body.light .lang-btn.active{background:#d0d7de;color:#1f2328;}
+.lang-btn.active{background:#f97316;color:#fff;}
+body.light .lang-btn.active{background:#d95f00;color:#fff;}
 
 /* TABS */
 #tabs{background:#0d1117;border-bottom:1px solid #21262d;display:flex;padding:0 16px;overflow-x:auto;transition:background .25s;}
@@ -294,20 +294,18 @@ body.light #loadingOverlay{background:rgba(246,248,250,.8);}
       <button class="lang-btn active" data-lang="cs">CZ</button>
       <button class="lang-btn" data-lang="en">EN</button>
     </div>
+    <div class="unit-toggle">
+      <button class="unit-btn active" data-unit="m3">m³</button>
+      <button class="unit-btn" data-unit="kwh">kWh</button>
+    </div>
     <div class="user-menu" id="userMenu" style="display:none">
       <div class="user-badge" id="userBadge">
         <span>👤</span>
-        <span id="userEmail">–</span>
-        <span id="userChevron">▾</span>
       </div>
       <div class="user-dropdown" id="userDropdown">
         <div class="user-dropdown-email" id="userEmailFull">–</div>
         <button class="user-dropdown-btn" id="btnLogout">⏻ &nbsp;Odhlásit se</button>
       </div>
-    </div>
-    <div class="unit-toggle">
-      <button class="unit-btn active" data-unit="m3">m³</button>
-      <button class="unit-btn" data-unit="kwh">kWh</button>
     </div>
   </div>
 </div>
@@ -477,7 +475,6 @@ function showApp(user) {
   document.getElementById("authScreen").style.display = "none";
   document.getElementById("userMenu").style.display = "flex";
   const email = user.email || "";
-  document.getElementById("userEmail").textContent = email.length > 16 ? email.slice(0,13)+"…" : email;
   document.getElementById("userEmailFull").textContent = email;
   // Clear seed data for real users
   readings = [];
