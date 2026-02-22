@@ -227,10 +227,20 @@ body.light .auth-err{color:#b91c1c;}
 body.light .auth-success{color:#0a8c5a;}
 
 /* USER BADGE in header */
+.user-menu{position:relative;}
 .user-badge{display:flex;align-items:center;gap:6px;background:#161b22;border:1px solid #30363d;border-radius:6px;padding:5px 10px;font-size:12px;color:#8b949e;cursor:pointer;transition:all .15s;}
 body.light .user-badge{background:#f3f4f6;border-color:#b1bac4;}
 .user-badge:hover{border-color:#f97316;color:#f97316;}
 body.light .user-badge:hover{border-color:#d95f00;color:#d95f00;}
+.user-dropdown{position:absolute;top:calc(100% + 6px);right:0;background:#0d1117;border:1px solid #30363d;border-radius:8px;min-width:200px;box-shadow:0 8px 24px rgba(0,0,0,.4);z-index:100;overflow:hidden;display:none;}
+body.light .user-dropdown{background:#fff;border-color:#d0d7de;box-shadow:0 8px 24px rgba(0,0,0,.12);}
+.user-dropdown.open{display:block;}
+.user-dropdown-email{padding:10px 14px;font-size:12px;color:#6e7681;border-bottom:1px solid #21262d;word-break:break-all;}
+body.light .user-dropdown-email{color:#57606a;border-color:#d0d7de;}
+.user-dropdown-btn{display:flex;align-items:center;gap:8px;width:100%;padding:10px 14px;font-size:13px;color:#f85149;background:none;border:none;cursor:pointer;transition:background .15s;}
+body.light .user-dropdown-btn{color:#b91c1c;}
+.user-dropdown-btn:hover{background:rgba(248,81,73,.08);}
+body.light .user-dropdown-btn:hover{background:rgba(185,28,28,.06);}
 
 /* LOADING overlay */
 #loadingOverlay{position:fixed;inset:0;background:rgba(1,4,9,.8);display:flex;align-items:center;justify-content:center;z-index:999;display:none;}
@@ -255,11 +265,11 @@ body.light #loadingOverlay{background:rgba(246,248,250,.8);}
     </div>
     <div class="auth-field">
       <label class="auth-label">E-mail</label>
-      <input type="email" class="auth-input" id="authEmail" placeholder="vas@email.cz">
+      <input type="email" class="auth-input" id="authEmail" name="email" autocomplete="email" placeholder="vas@email.cz">
     </div>
     <div class="auth-field">
       <label class="auth-label">Heslo</label>
-      <input type="password" class="auth-input" id="authPassword" placeholder="••••••••">
+      <input type="password" class="auth-input" id="authPassword" name="password" autocomplete="current-password" placeholder="••••••••">
     </div>
     <div class="auth-err" id="authErr"></div>
     <button class="auth-btn" id="authSubmit">Přihlásit se</button>
@@ -284,9 +294,16 @@ body.light #loadingOverlay{background:rgba(246,248,250,.8);}
       <button class="lang-btn active" data-lang="cs">CZ</button>
       <button class="lang-btn" data-lang="en">EN</button>
     </div>
-    <div class="user-badge" id="userBadge" style="display:none" title="Odhlásit se">
-      <span id="userEmail">–</span>
-      <span>⏻</span>
+    <div class="user-menu" id="userMenu" style="display:none">
+      <div class="user-badge" id="userBadge">
+        <span>👤</span>
+        <span id="userEmail">–</span>
+        <span id="userChevron">▾</span>
+      </div>
+      <div class="user-dropdown" id="userDropdown">
+        <div class="user-dropdown-email" id="userEmailFull">–</div>
+        <button class="user-dropdown-btn" id="btnLogout">⏻ &nbsp;Odhlásit se</button>
+      </div>
     </div>
     <div class="unit-toggle">
       <button class="unit-btn active" data-unit="m3">m³</button>
@@ -443,10 +460,10 @@ function showLoading(v) {
 function showApp(user) {
   currentUser = user;
   document.getElementById("authScreen").style.display = "none";
-  const badge = document.getElementById("userBadge");
-  badge.style.display = "flex";
+  document.getElementById("userMenu").style.display = "flex";
   const email = user.email || "";
-  document.getElementById("userEmail").textContent = email.length > 18 ? email.slice(0,15)+"…" : email;
+  document.getElementById("userEmail").textContent = email.length > 16 ? email.slice(0,13)+"…" : email;
+  document.getElementById("userEmailFull").textContent = email;
   // Clear seed data for real users
   readings = [];
   netatmoDays = [];
@@ -456,7 +473,7 @@ function showApp(user) {
 function showAuth() {
   currentUser = null;
   document.getElementById("authScreen").style.display = "flex";
-  document.getElementById("userBadge").style.display = "none";
+  document.getElementById("userMenu").style.display = "none";
 }
 
 // ── AUTH EVENT HANDLERS ────────────────────────────────────────────────────────
@@ -505,10 +522,26 @@ document.getElementById("authSubmit").addEventListener("click", async () => {
 document.getElementById("authEmail").addEventListener("keydown", e => { if(e.key==="Enter") document.getElementById("authPassword").focus(); });
 document.getElementById("authPassword").addEventListener("keydown", e => { if(e.key==="Enter") document.getElementById("authSubmit").click(); });
 
-document.getElementById("userBadge").addEventListener("click", async () => {
-  if (!confirm(t("authLogoutConfirm"))) return;
+// Dropdown toggle
+document.getElementById("userBadge").addEventListener("click", (e) => {
+  e.stopPropagation();
+  const dd = document.getElementById("userDropdown");
+  dd.classList.toggle("open");
+  document.getElementById("userChevron").textContent = dd.classList.contains("open") ? "▴" : "▾";
+});
+
+// Close dropdown when clicking outside
+document.addEventListener("click", () => {
+  const dd = document.getElementById("userDropdown");
+  if (dd) { dd.classList.remove("open"); document.getElementById("userChevron").textContent = "▾"; }
+});
+
+// Logout button
+document.getElementById("btnLogout").addEventListener("click", async (e) => {
+  e.stopPropagation();
   await sb.auth.signOut();
   readings = []; netatmoDays = [];
+  document.getElementById("userDropdown").classList.remove("open");
   showAuth();
 });
 
@@ -723,6 +756,7 @@ const T = {
     authErrFill: "Vyplňte e-mail a heslo.",
     authErrInvalid: "Špatný e-mail nebo heslo.",
     authSuccessRegister: "Účet vytvořen! Zkontrolujte e-mail pro potvrzení.",
+    authLogout: "Odhlásit se",
     authLogoutConfirm: "Opravdu se chcete odhlásit?",
     months: ["Leden","Únor","Březen","Duben","Květen","Červen","Červenec","Srpen","Září","Říjen","Listopad","Prosinec"],
     monthsShort: ["Led","Úno","Bře","Dub","Kvě","Čvn","Čvc","Srp","Zář","Říj","Lis","Pro"],
@@ -796,6 +830,7 @@ const T = {
     authErrFill: "Please fill in email and password.",
     authErrInvalid: "Invalid email or password.",
     authSuccessRegister: "Account created! Check your email to confirm.",
+    authLogout: "Sign out",
     authLogoutConfirm: "Are you sure you want to sign out?",
     months: ["January","February","March","April","May","June","July","August","September","October","November","December"],
     monthsShort: ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"],
@@ -963,6 +998,8 @@ function renderAll() {
   if (tabRegEl) tabRegEl.textContent = t("authRegister");
   const authBtn = document.getElementById("authSubmit");
   if (authBtn) authBtn.textContent = authMode==="login" ? t("authLogin") : t("authRegister");
+  const logoutBtn = document.getElementById("btnLogout");
+  if (logoutBtn) logoutBtn.innerHTML = "⏻ &nbsp;" + t("authLogout");
 
   document.getElementById("logoSub").textContent=
     useBoiler ? t("logoSubBoiler",{n:netatmoDays.length}) : t("logoSubLinear");
