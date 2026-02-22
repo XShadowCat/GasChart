@@ -115,6 +115,7 @@ body.light .btn-add{background:#d95f00;}
 .reading-row{display:flex;align-items:center;gap:8px;padding:10px 14px;border-bottom:1px solid #21262d;transition:background .25s;}
 body.light .reading-row{border-color:#d0d7de;}
 .reading-row:last-child{border-bottom:none;}
+.reading-row:first-child{border-top:none;}
 #readingsList{scrollbar-width:thin;scrollbar-color:#30363d #0d1117;}
 #readingsList::-webkit-scrollbar{width:4px;}
 #readingsList::-webkit-scrollbar-track{background:#0d1117;}
@@ -369,7 +370,7 @@ body.light #loadingOverlay{background:rgba(246,248,250,.8);}
       </div>
     </div>
     <div class="panel">
-      <div class="panel-header"><span id="readingsCount">ODEČTY</span><span class="hint" data-i18n="hintEnter">Enter = rychlé přidání</span></div>
+      <div class="panel-header" style="border-bottom:none;"><span id="readingsCount">ODEČTY</span><span class="hint" data-i18n="hintEnter">Enter = rychlé přidání</span></div>
       <div style="max-height:420px;overflow-y:auto;overscroll-behavior:contain;" id="readingsList"></div>
     </div>
   </div>
@@ -1132,7 +1133,7 @@ function renderAll() {
     const pctColor=iPct===null?"":`color:${iPct===100?successColor:iPct>50?(theme==="dark"?"#f59e0b":"#a16207"):accentColor}`;
     const pctLabel=iPct===null?"":iPct===100?`<span class="reading-pct" style="${pctColor}">✓100%</span>`:`<span class="reading-pct" style="${pctColor}">⚠${iPct}%</span>`;
     const isLatest=i===0;
-    const latestBg=isLatest?`background:${accentColor}0a`:"";
+    const latestBg=""; // bez zvláštního pozadí - oranžová tečka stačí
 
     // EDITING STATE
     if (editingId!==null && String(editingId)===String(r.id)) {
