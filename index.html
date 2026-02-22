@@ -1,0 +1,1183 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#010409" id="themeColor">
+<title>Plynograf 🔥</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:system-ui,'Segoe UI',sans-serif;background:#010409;color:#e6edf3;min-height:100vh;transition:background .25s,color .25s;}
+body.light{background:#f6f8fa;color:#1f2328;}
+button{cursor:pointer;font-family:inherit;border:none;background:none;}
+input{font-family:inherit;outline:none;}
+input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none;}
+::-webkit-scrollbar{width:4px;}
+::-webkit-scrollbar-thumb{background:#30363d;border-radius:4px;}
+
+/* HEADER */
+#header{background:#0d1117;border-bottom:1px solid #21262d;padding:12px 16px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50;transition:background .25s,border-color .25s;}
+body.light #header{background:#fff;border-color:#d0d7de;}
+.logo{display:flex;align-items:center;gap:10px;}
+.logo-icon{width:32px;height:32px;background:linear-gradient(135deg,#f97316,#ea580c);border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;}
+.logo-title{font-size:15px;font-weight:700;letter-spacing:-.02em;}
+.logo-sub{font-size:10px;color:#6e7681;font-family:monospace;}
+body.light .logo-sub{color:#6e7781;}
+.header-right{display:flex;gap:8px;align-items:center;}
+.btn-theme{background:#161b22;border:1px solid #30363d;border-radius:6px;color:#8b949e;padding:5px 10px;font-size:16px;line-height:1;transition:all .15s;}
+body.light .btn-theme{background:#f3f4f6;border-color:#b1bac4;}
+.unit-toggle{display:flex;background:#161b22;border:1px solid #30363d;border-radius:6px;overflow:hidden;}
+body.light .unit-toggle{background:#f6f8fa;border-color:#b1bac4;}
+.unit-btn{padding:6px 12px;font-weight:700;font-size:12px;font-family:monospace;color:#6e7681;transition:all .15s;}
+.unit-btn.active{background:#f97316;color:#fff;}
+body.light .unit-btn.active{background:#d95f00;}
+.lang-toggle{display:flex;background:#161b22;border:1px solid #30363d;border-radius:6px;overflow:hidden;}
+body.light .lang-toggle{background:#f6f8fa;border-color:#b1bac4;}
+.lang-btn{padding:6px 10px;font-weight:700;font-size:12px;font-family:monospace;color:#6e7681;transition:all .15s;}
+.lang-btn.active{background:#30363d;color:#e6edf3;}
+body.light .lang-btn.active{background:#d0d7de;color:#1f2328;}
+
+/* TABS */
+#tabs{background:#0d1117;border-bottom:1px solid #21262d;display:flex;padding:0 16px;overflow-x:auto;transition:background .25s;}
+body.light #tabs{background:#fff;border-color:#d0d7de;}
+.tab{background:none;border:none;border-bottom:2px solid transparent;color:#8b949e;padding:11px 14px;font-size:13px;font-weight:500;white-space:nowrap;transition:color .15s;}
+.tab.active{color:#f97316;border-bottom-color:#f97316;}
+body.light .tab.active{color:#d95f00;border-bottom-color:#d95f00;}
+
+/* CONTENT */
+#content{padding:16px;max-width:940px;margin:0 auto;}
+.screen{display:none;}
+.screen.active{display:block;}
+
+/* CARDS */
+.stat-cards{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px;}
+.stat-card{background:#0d1117;border:1px solid #21262d;border-radius:8px;padding:12px 14px;flex:1;min-width:120px;transition:background .25s,border-color .25s;}
+body.light .stat-card{background:#fff;border-color:#d0d7de;box-shadow:0 1px 3px rgba(0,0,0,.06);}
+.stat-label{font-size:10px;color:#6e7681;text-transform:uppercase;letter-spacing:.1em;margin-bottom:4px;}
+body.light .stat-label{color:#6e7781;}
+.stat-value{font-size:18px;font-weight:700;font-family:monospace;}
+.stat-sub{font-size:11px;color:#6e7681;margin-top:3px;}
+body.light .stat-sub{color:#6e7781;}
+
+/* PANEL */
+.panel{background:#0d1117;border:1px solid #21262d;border-radius:10px;overflow:hidden;margin-bottom:16px;transition:background .25s,border-color .25s;}
+body.light .panel{background:#fff;border-color:#d0d7de;box-shadow:0 1px 3px rgba(0,0,0,.06);}
+.panel-header{padding:10px 14px;border-bottom:1px solid #21262d;background:#161b22;display:flex;justify-content:space-between;align-items:center;font-size:10px;color:#6e7681;text-transform:uppercase;letter-spacing:.1em;font-family:monospace;transition:background .25s,border-color .25s;}
+body.light .panel-header{background:#f3f4f6;border-color:#d0d7de;}
+.panel-body{padding:16px;}
+
+/* CHART TOGGLE */
+.chart-mode-toggle{display:flex;background:#161b22;border:1px solid #30363d;border-radius:6px;overflow:hidden;width:fit-content;margin-bottom:12px;}
+body.light .chart-mode-toggle{background:#f6f8fa;border-color:#b1bac4;}
+.chart-mode-btn{padding:7px 14px;color:#6e7681;border-right:1px solid #30363d;font-size:13px;font-weight:500;transition:all .15s;}
+body.light .chart-mode-btn{border-color:#b1bac4;}
+.chart-mode-btn.active{background:#21262d;color:#e6edf3;}
+body.light .chart-mode-btn.active{background:#e5e7eb;color:#1f2328;}
+
+/* YEAR PILLS */
+.year-pills{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-bottom:12px;}
+.year-pill{padding:4px 12px;border-radius:4px;border:1.5px solid;font-weight:700;font-size:12px;font-family:monospace;transition:all .15s;}
+
+/* MONTH PILLS */
+.month-pills{display:flex;gap:4px;flex-wrap:wrap;align-items:center;margin-bottom:12px;}
+.month-pill{padding:3px 8px;border-radius:4px;border:1px solid #30363d;color:#8b949e;font-size:11px;font-family:monospace;transition:all .15s;}
+body.light .month-pill{border-color:#b1bac4;color:#57606a;}
+.month-pill.active{border-color:#f97316;background:rgba(249,115,22,.13);color:#f97316;}
+body.light .month-pill.active{border-color:#d95f00;background:rgba(217,95,0,.1);color:#d95f00;}
+
+/* CHART */
+.chart-wrap{background:#0d1117;border:1px solid #21262d;border-radius:10px;padding:16px 8px 10px;margin-bottom:12px;transition:background .25s,border-color .25s;}
+body.light .chart-wrap{background:#fff;border-color:#d0d7de;}
+.chart-title{font-size:10px;color:#6e7681;text-transform:uppercase;letter-spacing:.1em;font-family:monospace;margin-bottom:12px;padding-left:8px;}
+body.light .chart-title{color:#6e7781;}
+.chart-legend{display:flex;gap:14px;justify-content:center;margin-top:8px;flex-wrap:wrap;}
+.legend-item{display:flex;align-items:center;gap:5px;font-size:12px;font-family:monospace;font-weight:700;}
+
+/* SVG CHARTS */
+svg text{font-family:monospace;}
+
+/* FORM */
+.form-row{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;}
+.form-group{display:flex;flex-direction:column;gap:4px;}
+.form-label{font-size:10px;color:#6e7681;text-transform:uppercase;letter-spacing:.08em;}
+body.light .form-label{color:#6e7781;}
+.form-input{background:#161b22;border:1px solid #30363d;border-radius:6px;color:#e6edf3;padding:8px 12px;font-size:13px;transition:border-color .15s;}
+body.light .form-input{background:#f6f8fa;border-color:#b1bac4;color:#1f2328;}
+.form-input:focus{border-color:#f97316;}
+body.light .form-input:focus{border-color:#d95f00;}
+.btn-add{background:#f97316;border-radius:6px;color:#fff;padding:9px 18px;font-size:13px;font-weight:600;}
+body.light .btn-add{background:#d95f00;}
+
+/* READINGS LIST */
+.reading-row{display:flex;align-items:center;gap:8px;padding:10px 14px;border-bottom:1px solid #21262d;transition:background .25s;}
+body.light .reading-row{border-color:#d0d7de;}
+.reading-row:last-child{border-bottom:none;}
+.reading-dot{width:7px;height:7px;border-radius:50%;background:#30363d;flex-shrink:0;}
+body.light .reading-dot{background:#b1bac4;}
+.reading-dot.latest{background:#f97316;}
+body.light .reading-dot.latest{background:#d95f00;}
+.reading-date{color:#8b949e;font-size:12px;font-family:monospace;width:95px;flex-shrink:0;}
+body.light .reading-date{color:#57606a;}
+.reading-value{color:#e6edf3;font-size:14px;font-weight:700;font-family:monospace;flex:1;}
+body.light .reading-value{color:#1f2328;}
+.reading-diff{font-size:12px;font-family:monospace;color:#f97316;flex-shrink:0;}
+body.light .reading-diff{color:#d95f00;}
+.reading-days{font-size:11px;font-family:monospace;color:#6e7681;flex-shrink:0;}
+body.light .reading-days{color:#6e7781;}
+.reading-pct{font-size:11px;font-family:monospace;flex-shrink:0;}
+.btn-del{color:#6e7681;font-size:14px;padding:2px 4px;flex-shrink:0;}
+body.light .btn-del{color:#6e7781;}
+.btn-edit{color:#6e7681;font-size:13px;padding:2px 5px;flex-shrink:0;border-radius:4px;}
+body.light .btn-edit{color:#6e7781;}
+.reading-row.confirm-del{background:rgba(248,81,73,0.08)!important;border-color:rgba(248,81,73,0.25);}
+body.light .reading-row.confirm-del{background:rgba(185,28,28,0.07)!important;}
+.confirm-del-msg{font-size:12px;color:#f85149;flex:1;font-weight:500;}
+body.light .confirm-del-msg{color:#b91c1c;}
+.btn-confirm-del{background:rgba(248,81,73,0.15);border:1px solid rgba(248,81,73,0.4);border-radius:5px;color:#f85149;padding:4px 10px;font-size:12px;font-weight:600;flex-shrink:0;}
+body.light .btn-confirm-del{background:rgba(185,28,28,0.1);border-color:rgba(185,28,28,0.3);color:#b91c1c;}
+.btn-cancel-del{background:transparent;border:1px solid #30363d;border-radius:5px;color:#8b949e;padding:4px 10px;font-size:12px;flex-shrink:0;}
+body.light .btn-cancel-del{border-color:#b1bac4;color:#57606a;}
+.reading-row.editing{background:rgba(249,115,22,0.06)!important;padding:8px 14px;flex-wrap:wrap;align-items:center;}
+body.light .reading-row.editing{background:rgba(217,95,0,0.05)!important;}
+.edit-row-top{display:flex;align-items:center;gap:8px;width:100%;flex-wrap:wrap;}
+.edit-input{background:#161b22;border:1px solid #f97316;border-radius:5px;color:#e6edf3;padding:5px 9px;font-size:13px;font-family:monospace;}
+body.light .edit-input{background:#fff;border-color:#d95f00;color:#1f2328;}
+.edit-input-date{width:132px;}
+.edit-input-val{width:120px;}
+.edit-input-note{flex:1;min-width:80px;}
+.btn-save-edit{background:#f97316;border-radius:5px;color:#fff;padding:5px 12px;font-size:12px;font-weight:600;flex-shrink:0;}
+body.light .btn-save-edit{background:#d95f00;}
+.btn-cancel-edit{background:transparent;border:1px solid #30363d;border-radius:5px;color:#8b949e;padding:5px 10px;font-size:12px;flex-shrink:0;}
+body.light .btn-cancel-edit{border-color:#b1bac4;color:#57606a;}
+.edit-err{font-size:11px;color:#f85149;width:100%;margin-top:2px;display:none;}
+body.light .edit-err{color:#b91c1c;}
+
+/* ALERTS */
+.alert{border-radius:8px;padding:10px 14px;margin-bottom:14px;font-size:12px;}
+.alert-warn{background:rgba(245,158,11,.08);border:1px solid rgba(245,158,11,.25);color:#f59e0b;}
+body.light .alert-warn{background:rgba(161,98,7,.07);border-color:rgba(161,98,7,.25);color:#a16207;}
+.alert-success{background:rgba(16,185,129,.07);border:1px solid rgba(16,185,129,.22);color:#34d399;}
+body.light .alert-success{background:rgba(10,140,90,.07);border-color:rgba(10,140,90,.25);color:#0a8c5a;}
+.alert-error{background:rgba(248,81,73,.1);border:1px solid rgba(248,81,73,.3);color:#f85149;}
+body.light .alert-error{background:rgba(185,28,28,.07);border-color:rgba(185,28,28,.25);color:#b91c1c;}
+
+/* NETATMO UPLOAD */
+.upload-zone{background:#0d1117;border:2px dashed #30363d;border-radius:12px;padding:24px;text-align:center;margin-bottom:16px;cursor:pointer;transition:border-color .15s,background .25s;}
+body.light .upload-zone{background:#fff;border-color:#b1bac4;}
+.upload-zone:hover{border-color:#f97316;}
+body.light .upload-zone:hover{border-color:#d95f00;}
+.upload-icon{font-size:28px;margin-bottom:10px;}
+.upload-title{font-size:14px;font-weight:600;margin-bottom:6px;}
+.upload-desc{font-size:12px;color:#8b949e;line-height:1.8;margin-bottom:12px;}
+body.light .upload-desc{color:#57606a;}
+.upload-badges{display:inline-flex;gap:10px;margin-bottom:14px;flex-wrap:wrap;justify-content:center;}
+.upload-badge{font-size:12px;color:#34d399;}
+body.light .upload-badge{color:#0a8c5a;}
+.btn-upload{display:inline-block;background:#f97316;border-radius:6px;padding:8px 20px;font-size:13px;font-weight:600;color:#fff;}
+body.light .btn-upload{background:#d95f00;}
+
+/* COVERAGE BARS */
+.cov-row{display:flex;align-items:center;gap:8px;margin-bottom:5px;}
+.cov-label{font-size:11px;color:#6e7681;width:55px;font-family:monospace;flex-shrink:0;}
+body.light .cov-label{color:#6e7781;}
+.cov-track{flex:1;height:8px;background:#21262d;border-radius:4px;}
+body.light .cov-track{background:#d0d7de;}
+.cov-fill{height:100%;border-radius:4px;transition:width .4s;}
+.cov-pct{font-size:11px;font-family:monospace;width:36px;text-align:right;flex-shrink:0;}
+
+/* INFO BOX */
+.info-box{background:#0d1117;border:1px solid #21262d;border-radius:8px;padding:10px 14px;display:flex;gap:8px;font-size:11px;color:#8b949e;line-height:1.6;margin-top:12px;transition:background .25s,border-color .25s;}
+body.light .info-box{background:#fff;border-color:#d0d7de;color:#57606a;}
+
+.hint{font-size:10px;color:#6e7681;}
+body.light .hint{color:#6e7781;}
+.error-text{color:#f85149;font-size:12px;margin-top:8px;}
+body.light .error-text{color:#b91c1c;}
+</style>
+</head>
+<body>
+
+<div id="header">
+  <div class="logo">
+    <div class="logo-icon">🔥</div>
+    <div>
+      <div class="logo-title" data-i18n="appName">Plynograf</div>
+      <div class="logo-sub" id="logoSub">lineární interpolace</div>
+    </div>
+  </div>
+  <div class="header-right">
+    <button class="btn-theme" id="themeBtn" title="Přepnout téma">☀️</button>
+    <div class="lang-toggle">
+      <button class="lang-btn active" data-lang="cs">CZ</button>
+      <button class="lang-btn" data-lang="en">EN</button>
+    </div>
+    <div class="unit-toggle">
+      <button class="unit-btn active" data-unit="m3">m³</button>
+      <button class="unit-btn" data-unit="kwh">kWh</button>
+    </div>
+  </div>
+</div>
+
+<div id="tabs">
+  <button class="tab active" data-tab="charts">📊 Grafy</button>
+  <button class="tab" data-tab="readings">✏️ Odečty</button>
+  <button class="tab" data-tab="netatmo">📡 Netatmo</button>
+</div>
+
+<div id="content">
+
+  <!-- CHARTS -->
+  <div class="screen active" id="screen-charts">
+    <div class="stat-cards" id="statCards"></div>
+    <div id="weakAlert"></div>
+    <div class="chart-mode-toggle">
+      <button class="chart-mode-btn active" id="btnModeMonthly" data-mode="monthly">–</button>
+      <button class="chart-mode-btn" id="btnModeDaily" data-mode="daily">–</button>
+    </div>
+    <div class="year-pills" id="yearPills"></div>
+    <div class="month-pills" id="monthPills" style="display:none"></div>
+    <div class="chart-wrap" id="chartWrap">
+      <div class="chart-title" id="chartTitle"></div>
+      <div id="chartSvgContainer"></div>
+      <div class="chart-legend" id="chartLegend"></div>
+    </div>
+    <div class="info-box" id="infoBox"></div>
+  </div>
+
+  <!-- READINGS -->
+  <div class="screen" id="screen-readings">
+    <div class="panel" style="margin-bottom:16px;">
+      <div class="panel-header"><span data-i18n="readingsTitle">NOVÝ ODEČET PLYNOMĚRU</span></div>
+      <div class="panel-body">
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label"><span data-i18n="labelDate">Datum</span></label>
+            <input type="date" class="form-input" id="inDate">
+          </div>
+          <div class="form-group">
+            <label class="form-label"><span data-i18n="labelValue">Stav plynoměru (m³)</span></label>
+            <input type="number" class="form-input" id="inValue" placeholder="např. 14 200" style="width:150px">
+          </div>
+          <div class="form-group" style="flex:1;min-width:100px;">
+            <label class="form-label"><span data-i18n="labelNote">Poznámka</span></label>
+            <input type="text" class="form-input" id="inNote" placeholder="volitelné" style="width:100%">
+          </div>
+          <button class="btn-add" id="btnAdd">+ Přidat</button>
+        </div>
+        <div class="error-text" id="addErr" style="display:none"></div>
+      </div>
+    </div>
+    <div class="panel">
+      <div class="panel-header"><span id="readingsCount">ODEČTY</span><span class="hint" data-i18n="hintEnter">Enter = rychlé přidání</span></div>
+      <div style="max-height:420px;overflow-y:auto;" id="readingsList"></div>
+    </div>
+  </div>
+
+  <!-- NETATMO -->
+  <div class="screen" id="screen-netatmo">
+    <div class="upload-zone" id="uploadZone">
+      <input type="file" accept=".csv" id="fileInput" style="display:none">
+      <div class="upload-icon">📡</div>
+      <div class="upload-title" id="uploadTitle">Nahrát Netatmo Energy CSV</div>
+      <div class="upload-desc" id="uploadDesc">Každý CSV se <strong>automaticky sloučí</strong> s předchozími daty<br>Překryvy OK · Mezery = lineární fallback · Libovolné pořadí</div>
+      <div class="upload-badges" id="uploadBadges">
+        <span class="upload-badge">✓ Překryvy</span>
+        <span class="upload-badge">✓ Mezery</span>
+        <span class="upload-badge">✓ Duplicity</span>
+        <span class="upload-badge">✓ Pořadí</span>
+      </div>
+      <div class="btn-upload" id="btnUploadLabel">+ Přidat CSV soubor</div>
+    </div>
+    <div id="importAlert"></div>
+    <div id="coverageWrap"></div>
+    <div id="howtoWrap"></div>
+  </div>
+
+</div>
+
+<script>
+// ── DATA ─────────────────────────────────────────────────────────────────────
+const KWH = 10.55;
+const MO_SHORT = () => T[lang].monthsShort;
+const MO_LONG  = () => T[lang].months;
+
+const YP = {
+  dark:  {2023:"#3b82f6",2024:"#10b981",2025:"#a855f7",2026:"#f97316"},
+  light: {2023:"#2563eb",2024:"#059669",2025:"#7c3aed",2026:"#d95f00"},
+};
+
+let readings = [
+  {id:1,date:"2023-01-05",value:12100},{id:2,date:"2023-01-18",value:12172},
+  {id:3,date:"2023-02-02",value:12248},{id:4,date:"2023-02-20",value:12310},
+  {id:5,date:"2023-03-08",value:12368},{id:6,date:"2023-03-27",value:12410},
+  {id:7,date:"2023-04-14",value:12445},{id:8,date:"2023-05-03",value:12463},
+  {id:9,date:"2023-09-12",value:12489},{id:10,date:"2023-10-05",value:12521},
+  {id:11,date:"2023-10-28",value:12580},{id:12,date:"2023-11-14",value:12658},
+  {id:13,date:"2023-12-20",value:12820},{id:14,date:"2024-01-06",value:12912},
+  {id:15,date:"2024-01-22",value:12988},{id:16,date:"2024-02-05",value:13055},
+  {id:17,date:"2024-02-19",value:13115},{id:18,date:"2024-03-04",value:13168},
+  {id:19,date:"2024-03-25",value:13205},{id:20,date:"2024-04-10",value:13228},
+  {id:21,date:"2024-05-08",value:13241},{id:22,date:"2024-09-10",value:13261},
+  {id:23,date:"2024-10-03",value:13288},{id:24,date:"2024-10-24",value:13340},
+  {id:25,date:"2024-11-08",value:13408},{id:26,date:"2024-11-26",value:13478},
+  {id:27,date:"2024-12-28",value:13620},{id:28,date:"2025-01-08",value:13702},
+  {id:29,date:"2025-01-22",value:13775},{id:30,date:"2025-02-05",value:13838},
+  {id:31,date:"2025-02-14",value:13878},{id:32,date:"2026-02-01",value:14100},
+  {id:33,date:"2026-02-18",value:14142},
+];
+let nextId = 200;
+let pendingDelId = null;  // ID čekající na potvrzení smazání
+let editingId = null;     // ID právě editovaného odečtu
+let netatmoDays = [];
+let unit = "m3";
+let theme = "dark";
+let lang = "cs";
+let chartMode = "monthly";
+let selMonth = 1;
+let visYears = [2024,2025,2026];
+
+// ── NETATMO PARSER ────────────────────────────────────────────────────────────
+function parseNetatmoCSV(text) {
+  const lines = text.split(/\r?\n/);
+  let hi = -1;
+  for (let i=0;i<lines.length;i++) { if (lines[i].startsWith("Timestamp")) {hi=i;break;} }
+  if (hi===-1) throw new Error("Nenalezen řádek 'Timestamp'.");
+  const db={}, dt={};
+  let parsed=0;
+  for (let i=hi+1;i<lines.length;i++) {
+    const l=lines[i].trim(); if (!l) continue;
+    const p=l.split(","); if (p.length<5) continue;
+    try {
+      const date=p[1].replace(/"/g,"").trim().slice(0,10).replace(/\//g,"-");
+      if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) continue;
+      const boilerOn=parseFloat(p[4]), temp=parseFloat(p[2]);
+      if (isNaN(boilerOn)||isNaN(temp)) continue;
+      db[date]=(db[date]||0)+boilerOn;
+      if (!dt[date]) dt[date]=[];
+      dt[date].push(temp); parsed++;
+    } catch(e){}
+  }
+  const days=Object.keys(db).sort();
+  if (!days.length) throw new Error("CSV neobsahuje platná data.");
+  return {
+    days: days.map(d=>({date:d, boilerOnSeconds:Math.round(db[d]),
+      boilerOnHours:Math.round(db[d]/3600*10)/10,
+      avgTemp:dt[d]?Math.round(dt[d].reduce((s,v)=>s+v,0)/dt[d].length*10)/10:null,
+      records:dt[d]?.length||0})),
+    parsed, dateFrom:days[0], dateTo:days[days.length-1]
+  };
+}
+
+function mergeNetatmo(existing, incoming) {
+  const map={};
+  for (const d of existing) map[d.date]=d;
+  for (const d of incoming) map[d.date]=d;
+  return Object.values(map).sort((a,b)=>a.date.localeCompare(b.date));
+}
+
+// ── INTERPOLATION ─────────────────────────────────────────────────────────────
+function getBoilerMap() {
+  if (!netatmoDays.length) return null;
+  const m={};
+  for (const d of netatmoDays) m[d.date]=d.boilerOnSeconds;
+  return m;
+}
+
+function buildDailyMap() {
+  const bom=getBoilerMap();
+  const sorted=[...readings].sort((a,b)=>new Date(a.date)-new Date(b.date));
+  const daily={};
+  for (let i=0;i<sorted.length-1;i++) {
+    const s=new Date(sorted[i].date), e=new Date(sorted[i+1].date);
+    const dc=Math.round((e-s)/86400000);
+    if (dc<=0) continue;
+    const total=sorted[i+1].value-sorted[i].value;
+    if (total<0) continue;
+    const days=[];
+    for (let d=0;d<dc;d++) {
+      const day=new Date(s); day.setDate(s.getDate()+d);
+      const key=day.toISOString().slice(0,10);
+      days.push({key, boiler:bom?.[key]??null});
+    }
+    const allB=bom&&days.every(d=>d.boiler!==null);
+    if (allB) {
+      const tb=days.reduce((s,d)=>s+d.boiler,0);
+      for (const {key,boiler} of days) daily[key]=tb>0?(boiler/tb)*total:total/dc;
+    } else {
+      for (const {key} of days) daily[key]=total/dc;
+    }
+  }
+  return daily;
+}
+
+function aggregateMonthly(dm) {
+  const r={};
+  for (const [date,val] of Object.entries(dm)) {
+    const [y,m]=date.split("-"); const k=`${y}-${m}`;
+    r[k]=(r[k]||0)+val;
+  }
+  return r;
+}
+
+function convert(m3) { return unit==="kwh" ? m3*KWH : m3; }
+function ul() { return unit==="m3"?"m³":"kWh"; }
+
+// ── TRANSLATIONS ──────────────────────────────────────────────────────────────
+const T = {
+  cs: {
+    // Header
+    appName: "Plynograf",
+    logoSubLinear: "lineární interpolace",
+    logoSubBoiler: "✓ BoilerOn · {n} dní",
+    // Tabs
+    tabCharts: "📊 Grafy",
+    tabReadings: "✏️ Odečty",
+    tabNetatmo: "📡 Netatmo",
+    // Stat cards
+    statThisMonth: "Tento měsíc",
+    statVsLastYear: "vs. loni",
+    statLastYear: "Loni",
+    statInterpolation: "Interpolace",
+    statReadings: "Odečtů",
+    statIrregular: "nepravidelné",
+    statUploadCSV: "Nahrajte CSV",
+    statDays: "dní",
+    // Chart
+    chartMonthly: "Měsíční",
+    chartDaily: "Denní detail",
+    chartTitleMonthly: "Spotřeba po měsících",
+    chartTitleDailyPre: "Denní spotřeba",
+    chartBoilerOn: "🟢 BoilerOn",
+    chartLinear: "lineární",
+    labelYears: "ROKY:",
+    labelMonth: "MĚSÍC:",
+    // Info box
+    infoWeighted: "Vážená interpolace (BoilerOn):",
+    infoWeightedDesc: "Denní spotřeba odpovídá době provozu kotle. Dny s delším topením mají vyšší podíl.",
+    infoLinear: "Lineární interpolace:",
+    infoLinearDesc: "Spotřeba rovnoměrně rozdělena. Nahrajte Netatmo CSV pro přesnější výsledky.",
+    // Weak intervals
+    weakAlert: "interval s neúplnými Netatmo daty:",
+    weakAlerts: "intervaly s neúplnými Netatmo daty:",
+    // Readings
+    readingsTitle: "NOVÝ ODEČET PLYNOMĚRU",
+    labelDate: "Datum",
+    labelValue: "Stav plynoměru (m³)",
+    labelNote: "Poznámka",
+    placeholderValue: "např. 14 200",
+    placeholderNote: "volitelné",
+    btnAdd: "+ Přidat",
+    readingsCount: "ODEČTY — {n} záznamů",
+    hintEnter: "Enter = rychlé přidání",
+    errFillAll: "Vyplňte datum i hodnotu.",
+    errInvalidVal: "Neplatná hodnota.",
+    errOrder: "Hodnota musí být větší než předchozí odečet.",
+    confirmDelete: "Opravdu smazat tento odečet?",
+    btnBack: "Zpět",
+    btnDelete: "Smazat",
+    btnSave: "✓ Uložit",
+    btnCancel: "Zrušit",
+    editErrFill: "Vyplňte datum i hodnotu.",
+    editErrOrder: "Hodnota by porušila pořadí odečtů — zkontrolujte číslo.",
+    // Netatmo
+    uploadTitle: "Nahrát Netatmo Energy CSV",
+    uploadDesc: "Každý CSV se <strong>automaticky sloučí</strong> s předchozími daty<br>Překryvy OK · Mezery = lineární fallback · Libovolné pořadí",
+    uploadBadges: ["✓ Překryvy","✓ Mezery","✓ Duplicity","✓ Pořadí"],
+    btnUpload: "+ Přidat CSV soubor",
+    importSuccess: "✓ Import",
+    importDays: "dní",
+    importTotal: "Celkem",
+    coverageTitle: "POKRYTÍ NETATMO DAT PER MĚSÍC",
+    btnClearNetatmo: "Vymazat Netatmo data",
+    howtoTitle: "Jak exportovat z Netatmo Energy:",
+    howtoSteps: [
+      "Otevřete Netatmo Energy (web nebo app)",
+      "Nastavení → Správa dat → Stáhnout historii",
+      "Zvolte časové období → Export CSV",
+      "Nahrajte sem — opakujte pro každé období"
+    ],
+    months: ["Leden","Únor","Březen","Duben","Květen","Červen","Červenec","Srpen","Září","Říjen","Listopad","Prosinec"],
+    monthsShort: ["Led","Úno","Bře","Dub","Kvě","Čvn","Čvc","Srp","Zář","Říj","Lis","Pro"],
+  },
+  en: {
+    appName: "GasChart",
+    logoSubLinear: "linear interpolation",
+    logoSubBoiler: "✓ BoilerOn · {n} days",
+    tabCharts: "📊 Charts",
+    tabReadings: "✏️ Readings",
+    tabNetatmo: "📡 Netatmo",
+    statThisMonth: "This month",
+    statVsLastYear: "vs. last year",
+    statLastYear: "Last year",
+    statInterpolation: "Interpolation",
+    statReadings: "Readings",
+    statIrregular: "irregular",
+    statUploadCSV: "Upload CSV",
+    statDays: "days",
+    chartMonthly: "Monthly",
+    chartDaily: "Daily detail",
+    chartTitleMonthly: "Consumption by month",
+    chartTitleDailyPre: "Daily consumption",
+    chartBoilerOn: "🟢 BoilerOn",
+    chartLinear: "linear",
+    labelYears: "YEARS:",
+    labelMonth: "MONTH:",
+    infoWeighted: "Weighted interpolation (BoilerOn):",
+    infoWeightedDesc: "Daily consumption reflects actual boiler runtime. Days with longer heating get a higher share.",
+    infoLinear: "Linear interpolation:",
+    infoLinearDesc: "Consumption spread evenly between readings. Upload Netatmo CSV for more accurate results.",
+    weakAlert: "interval with incomplete Netatmo data:",
+    weakAlerts: "intervals with incomplete Netatmo data:",
+    readingsTitle: "NEW METER READING",
+    labelDate: "Date",
+    labelValue: "Meter reading (m³)",
+    labelNote: "Note",
+    placeholderValue: "e.g. 14 200",
+    placeholderNote: "optional",
+    btnAdd: "+ Add",
+    readingsCount: "READINGS — {n} entries",
+    hintEnter: "Enter = quick add",
+    errFillAll: "Please fill in date and value.",
+    errInvalidVal: "Invalid value.",
+    errOrder: "Value must be greater than the previous reading.",
+    confirmDelete: "Really delete this reading?",
+    btnBack: "Back",
+    btnDelete: "Delete",
+    btnSave: "✓ Save",
+    btnCancel: "Cancel",
+    editErrFill: "Please fill in date and value.",
+    editErrOrder: "Value would break reading order — please check the number.",
+    uploadTitle: "Upload Netatmo Energy CSV",
+    uploadDesc: "Each CSV is <strong>automatically merged</strong> with previously uploaded data<br>Overlaps OK · Gaps = linear fallback · Any order",
+    uploadBadges: ["✓ Overlaps","✓ Gaps","✓ Duplicates","✓ Any order"],
+    btnUpload: "+ Add CSV file",
+    importSuccess: "✓ Imported",
+    importDays: "days",
+    importTotal: "Total",
+    coverageTitle: "NETATMO DATA COVERAGE PER MONTH",
+    btnClearNetatmo: "Clear Netatmo data",
+    howtoTitle: "How to export from Netatmo Energy:",
+    howtoSteps: [
+      "Open Netatmo Energy (web or app)",
+      "Settings → Data management → Download history",
+      "Choose a time period → Export CSV",
+      "Upload here — repeat for each period"
+    ],
+    months: ["January","February","March","April","May","June","July","August","September","October","November","December"],
+    monthsShort: ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"],
+  }
+};
+function t(key, vars) {
+  const str = T[lang][key] ?? T["cs"][key] ?? key;
+  if (!vars) return str;
+  return str.replace(/\{(\w+)\}/g, (_,k) => vars[k] ?? "");
+}
+
+// ── SVG BAR CHART ─────────────────────────────────────────────────────────────
+function renderBarChart() {
+  const dm=buildDailyMap(), mm=aggregateMonthly(dm);
+  const palette=YP[theme];
+  const container=document.getElementById("chartSvgContainer");
+  const W=container.offsetWidth||document.getElementById("chartWrap").offsetWidth-32||window.innerWidth-64;
+  const H=220, PL=48, PR=8, PT=10, PB=30;
+  const cW=W-PL-PR, cH=H-PT-PB;
+
+  // gather data
+  const data=MO_SHORT().map((label,mi)=>{
+    const row={label,mi};
+    for (const y of visYears) {
+      const key=`${y}-${String(mi+1).padStart(2,"0")}`;
+      row[y]=mm[key]!=null?convert(mm[key]):null;
+    }
+    return row;
+  });
+
+  const allVals=data.flatMap(r=>visYears.map(y=>r[y]).filter(v=>v!=null));
+  const maxV=allVals.length?Math.max(...allVals)*1.1:10;
+
+  const barW=Math.max(4, (cW/12 - visYears.length*2) / visYears.length);
+  const groupW=cW/12;
+
+  let bars="", labels="", yLines="";
+
+  // Y grid lines
+  const ticks=4;
+  for (let t=0;t<=ticks;t++) {
+    const val=maxV*t/ticks;
+    const y=PT+cH-(cH*t/ticks);
+    yLines+=`<line x1="${PL}" y1="${y}" x2="${W-PR}" y2="${y}" stroke="${theme==="dark"?"#21262d":"#e5e7eb"}" stroke-dasharray="2,4"/>`;
+    yLines+=`<text x="${PL-4}" y="${y+4}" text-anchor="end" font-size="9" fill="${theme==="dark"?"#6e7681":"#6e7781"}">${val>=100?Math.round(val):val.toFixed(1)}</text>`;
+  }
+
+  // bars
+  data.forEach((row,mi)=>{
+    const gx=PL+mi*groupW;
+    // label
+    labels+=`<text x="${gx+groupW/2}" y="${H-8}" text-anchor="middle" font-size="9" fill="${theme==="dark"?"#6e7681":"#6e7781"}">${row.label}</text>`;
+    visYears.forEach((y,yi)=>{
+      if (row[y]==null) return;
+      const bh=Math.max(2,(row[y]/maxV)*cH);
+      const bx=gx+(yi*(barW+2))+(groupW-visYears.length*(barW+2))/2;
+      const by=PT+cH-bh;
+      const color=palette[y]||"#94a3b8";
+      bars+=`<rect x="${bx}" y="${by}" width="${barW}" height="${bh}" fill="${color}" rx="2" opacity="0.9">
+        <title>${y}: ${row[y].toFixed(1)} ${ul()}</title></rect>`;
+    });
+  });
+
+  document.getElementById("chartSvgContainer").innerHTML=
+    `<svg width="100%" height="${H}" viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg">
+      ${yLines}${bars}${labels}
+    </svg>`;
+}
+
+// ── SVG AREA CHART ────────────────────────────────────────────────────────────
+function renderAreaChart() {
+  const dm=buildDailyMap();
+  const palette=YP[theme];
+  const container=document.getElementById("chartSvgContainer");
+  const W=container.offsetWidth||document.getElementById("chartWrap").offsetWidth-32||window.innerWidth-64;
+  const H=220, PL=48, PR=8, PT=10, PB=30;
+  const cW=W-PL-PR, cH=H-PT-PB;
+  const days=31;
+
+  const data=Array.from({length:days},(_,di)=>{
+    const d=di+1, row={d};
+    for (const y of visYears) {
+      const m=String(selMonth+1).padStart(2,"0"), ds=`${y}-${m}-${String(d).padStart(2,"0")}`;
+      if (new Date(ds).getMonth()!==selMonth) { row[y]=null; continue; }
+      const raw=dm[ds]??null;
+      row[y]=raw!==null?convert(raw):null;
+    }
+    return row;
+  });
+
+  const allVals=data.flatMap(r=>visYears.map(y=>r[y]).filter(v=>v!=null));
+  const maxV=allVals.length?Math.max(...allVals)*1.15:1;
+
+  let areas="", lines="", yLines="";
+
+  const ticks=4;
+  for (let t=0;t<=ticks;t++) {
+    const val=maxV*t/ticks;
+    const y=PT+cH-(cH*t/ticks);
+    yLines+=`<line x1="${PL}" y1="${y}" x2="${W-PR}" y2="${y}" stroke="${theme==="dark"?"#21262d":"#e5e7eb"}" stroke-dasharray="2,4"/>`;
+    yLines+=`<text x="${PL-4}" y="${y+4}" text-anchor="end" font-size="9" fill="${theme==="dark"?"#6e7681":"#6e7781"}">${val.toFixed(2)}</text>`;
+  }
+
+  // X labels
+  let xlabels="";
+  [1,5,10,15,20,25,31].forEach(d=>{
+    const x=PL+(d-1)/(days-1)*cW;
+    xlabels+=`<text x="${x}" y="${H-8}" text-anchor="middle" font-size="9" fill="${theme==="dark"?"#6e7681":"#6e7781"}">${d}</text>`;
+  });
+
+  visYears.forEach(y=>{
+    const color=palette[y]||"#94a3b8";
+    const pts=data.map((r,i)=>({x:PL+i/(days-1)*cW, y:r[y]!=null?PT+cH-(r[y]/maxV)*cH:null}));
+
+    // build path segments (skip nulls)
+    let linePath="", areaPath="";
+    let seg=[];
+    pts.forEach((p,i)=>{
+      if (p.y!==null) { seg.push(p); }
+      else {
+        if (seg.length>1) {
+          linePath+=seg.map((pt,j)=>`${j===0?"M":"L"}${pt.x.toFixed(1)},${pt.y.toFixed(1)}`).join(" ")+" ";
+          areaPath+=`M${seg[0].x.toFixed(1)},${(PT+cH).toFixed(1)} `+seg.map(pt=>`L${pt.x.toFixed(1)},${pt.y.toFixed(1)}`).join(" ")+` L${seg[seg.length-1].x.toFixed(1)},${(PT+cH).toFixed(1)} Z `;
+        }
+        seg=[];
+      }
+    });
+    if (seg.length>1) {
+      linePath+=seg.map((pt,j)=>`${j===0?"M":"L"}${pt.x.toFixed(1)},${pt.y.toFixed(1)}`).join(" ");
+      areaPath+=`M${seg[0].x.toFixed(1)},${(PT+cH).toFixed(1)} `+seg.map(pt=>`L${pt.x.toFixed(1)},${pt.y.toFixed(1)}`).join(" ")+` L${seg[seg.length-1].x.toFixed(1)},${(PT+cH).toFixed(1)} Z`;
+    }
+
+    const gradId=`grad${y}`;
+    areas+=`<defs><linearGradient id="${gradId}" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="5%" stop-color="${color}" stop-opacity="${theme==="dark"?0.25:0.15}"/>
+      <stop offset="95%" stop-color="${color}" stop-opacity="0"/>
+    </linearGradient></defs>
+    <path d="${areaPath}" fill="url(#${gradId})"/>`;
+    lines+=`<path d="${linePath}" fill="none" stroke="${color}" stroke-width="2"/>`;
+  });
+
+  document.getElementById("chartSvgContainer").innerHTML=
+    `<svg width="100%" height="${H}" viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg">
+      ${yLines}${areas}${lines}${xlabels}
+    </svg>`;
+}
+
+// ── RENDER ────────────────────────────────────────────────────────────────────
+function availableYears() {
+  return [...new Set(readings.map(r=>new Date(r.date).getFullYear()))].sort();
+}
+
+function renderAll() {
+  const bom=getBoilerMap();
+  const useBoiler=!!bom;
+  const palette=YP[theme];
+
+  // Logo sub
+  document.getElementById("logoSub").textContent=
+    useBoiler ? t("logoSubBoiler",{n:netatmoDays.length}) : t("logoSubLinear");
+
+  // Tab labels
+  document.querySelector('[data-tab="charts"]').textContent=t("tabCharts");
+  document.querySelector('[data-tab="readings"]').textContent=t("tabReadings");
+  document.querySelector('[data-tab="netatmo"]').textContent=
+    t("tabNetatmo")+(netatmoDays.length?` (${netatmoDays.length}d)`:"");
+
+  // Theme
+  document.body.className=theme==="light"?"light":"";
+  document.title=t("appName")+" 🔥";
+  document.getElementById("themeBtn").textContent=theme==="dark"?"☀️":"🌙";
+  document.getElementById("themeColor").content=theme==="dark"?"#010409":"#f6f8fa";
+
+  // Netatmo tab label
+  document.querySelector('[data-tab="netatmo"]').textContent=
+    `📡 Netatmo${netatmoDays.length?` (${netatmoDays.length}d)`:""}`;
+
+  // ── STATS
+  const dm=buildDailyMap(), mm=aggregateMonthly(dm);
+  const now=new Date();
+  const curKey=`${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,"0")}`;
+  const prevKey=`${now.getFullYear()-1}-${String(now.getMonth()+1).padStart(2,"0")}`;
+  const cur=convert(mm[curKey]||0), prev=convert(mm[prevKey]||0);
+  const pct=prev>0?Math.round(((cur-prev)/prev)*100):null;
+  const diffColor=pct===null?(theme==="dark"?"#6e7681":"#6e7781"):pct<0?(theme==="dark"?"#3fb950":"#0a8c5a"):(theme==="dark"?"#f85149":"#b91c1c");
+  const diffLabel=pct===null?"–":`${pct<0?"▼":"▲"} ${Math.abs(pct)}%`;
+  const accentColor=theme==="dark"?"#f97316":"#d95f00";
+  const successColor=theme==="dark"?"#34d399":"#0a8c5a";
+  const mutedColor=theme==="dark"?"#8b949e":"#57606a";
+
+  document.getElementById("statCards").innerHTML=[
+    {label:t("statThisMonth"),value:`${cur.toFixed(1)} ${ul()}`,color:accentColor},
+    {label:t("statVsLastYear"),value:diffLabel,color:diffColor,sub:`${t("statLastYear")}: ${prev.toFixed(1)} ${ul()}`},
+    {label:t("statInterpolation"),value:useBoiler?"BoilerOn ✓":(lang==="cs"?"Lineární":"Linear"),color:useBoiler?successColor:mutedColor,sub:useBoiler?`${netatmoDays.length} ${t("statDays")}`:t("statUploadCSV")},
+    {label:t("statReadings"),value:readings.length,color:"",sub:t("statIrregular")},
+  ].map(c=>`<div class="stat-card">
+    <div class="stat-label">${c.label}</div>
+    <div class="stat-value" style="color:${c.color||"inherit"}">${c.value}</div>
+    ${c.sub?`<div class="stat-sub">${c.sub}</div>`:""}
+  </div>`).join("");
+
+  // ── WEAK INTERVALS
+  const sorted=[...readings].sort((a,b)=>new Date(a.date)-new Date(b.date));
+  const weak=[];
+  if (bom) {
+    for (let i=0;i<sorted.length-1;i++) {
+      const s=new Date(sorted[i].date), e=new Date(sorted[i+1].date);
+      const dc=Math.round((e-s)/86400000); if (dc<=0) continue;
+      let cov=0;
+      for (let d=0;d<dc;d++) {
+        const day=new Date(s); day.setDate(s.getDate()+d);
+        if (bom[day.toISOString().slice(0,10)]!==undefined) cov++;
+      }
+      const pct=Math.round(cov/dc*100);
+      if (pct<100) weak.push({from:sorted[i].date,to:sorted[i+1].date,dc,pct});
+    }
+  }
+  document.getElementById("weakAlert").innerHTML=weak.length
+    ?`<div class="alert alert-warn" style="margin-bottom:14px">
+      <strong>⚠ ${weak.length} interval${weak.length>1?"y":""} s neúplnými Netatmo daty:</strong><br>
+      ${weak.map(w=>`<span style="font-family:monospace;font-size:11px">${w.from} → ${w.to} · ${w.pct}%</span>`).join("<br>")}
+    </div>`:"";
+
+  // Update chart mode button labels
+  const bMonthly=document.getElementById("btnModeMonthly");
+  const bDaily=document.getElementById("btnModeDaily");
+  if(bMonthly) bMonthly.textContent=t("chartMonthly");
+  if(bDaily) bDaily.textContent=t("chartDaily");
+
+  // ── YEAR PILLS
+  const ay=availableYears();
+  document.getElementById("yearPills").innerHTML=
+    `<span style="font-size:10px;color:${theme==="dark"?"#6e7681":"#6e7781"};font-family:monospace;margin-right:4px">${t("labelYears")}</span>`+
+    ay.map(y=>{
+      const c=palette[y]||"#94a3b8", active=visYears.includes(y);
+      return `<button class="year-pill" data-year="${y}" style="border-color:${c};background:${active?c:"transparent"};color:${active?"#fff":c}">${y}</button>`;
+    }).join("");
+
+  // ── MONTH PILLS
+  const mp=document.getElementById("monthPills");
+  if (chartMode==="daily") {
+    mp.style.display="flex";
+    mp.innerHTML=`<span style="font-size:10px;color:${theme==="dark"?"#6e7681":"#6e7781"};font-family:monospace;margin-right:4px">${t("labelMonth")}</span>`+
+      MO_SHORT().map((m,i)=>`<button class="month-pill${selMonth===i?" active":""}" data-month="${i}">${m}</button>`).join("");
+  } else { mp.style.display="none"; }
+
+  // ── CHART
+  const chartTitle=chartMode==="monthly"
+    ?`${t("chartTitleMonthly")} · ${ul()}${useBoiler?" · "+t("chartBoilerOn"):" · "+t("chartLinear")}`
+    :`${t("chartTitleDailyPre")} · ${MO_LONG()[selMonth]} · ${ul()}`;
+  document.getElementById("chartTitle").textContent=chartTitle;
+
+  if (chartMode==="monthly") renderBarChart(); else renderAreaChart();
+
+  // Legend
+  document.getElementById("chartLegend").innerHTML=visYears.map(y=>{
+    const c=palette[y]||"#94a3b8";
+    return chartMode==="monthly"
+      ?`<div class="legend-item"><div style="width:12px;height:12px;background:${c};border-radius:2px"></div><span style="color:${c}">${y}</span></div>`
+      :`<div class="legend-item"><div style="width:20px;height:2px;background:${c};border-radius:2px"></div><span style="color:${c}">${y}</span></div>`;
+  }).join("");
+
+  // Info box
+  document.getElementById("infoBox").innerHTML=useBoiler
+    ?`<span>🟢</span><span><strong style="color:${successColor}">${t("infoWeighted")}</strong> ${t("infoWeightedDesc")}</span>`
+    :`<span>🔬</span><span><strong style="color:${theme==="dark"?"#58a6ff":"#1d4ed8"}">${t("infoLinear")}</strong> ${t("infoLinearDesc")}</span>`;
+
+  // ── READINGS LIST
+  document.getElementById("readingsCount").textContent=t("readingsCount",{n:readings.length});
+  const sortedR=[...readings].sort((a,b)=>new Date(b.date)-new Date(a.date));
+  document.getElementById("readingsList").innerHTML=sortedR.map((r,i)=>{
+    const next=sortedR[i+1];
+    const diff=next?r.value-next.value:null;
+    const days=next?Math.round((new Date(r.date)-new Date(next.date))/86400000):null;
+    let iPct=null;
+    if (bom&&diff!==null&&days!==null) {
+      let cov=0;
+      for (let d=0;d<days;d++) {
+        const day=new Date(next.date); day.setDate(new Date(next.date).getDate()+d);
+        if (bom[day.toISOString().slice(0,10)]!==undefined) cov++;
+      }
+      iPct=Math.round(cov/days*100);
+    }
+    const pctColor=iPct===null?"":`color:${iPct===100?successColor:iPct>50?(theme==="dark"?"#f59e0b":"#a16207"):accentColor}`;
+    const pctLabel=iPct===null?"":iPct===100?`<span class="reading-pct" style="${pctColor}">✓100%</span>`:`<span class="reading-pct" style="${pctColor}">⚠${iPct}%</span>`;
+    const isLatest=i===0;
+    const latestBg=isLatest?`background:${accentColor}0a`:"";
+
+    // EDITING STATE
+    if (editingId===r.id) {
+      return `<div class="reading-row editing" data-id="${r.id}">
+        <div class="edit-row-top">
+          <input class="edit-input edit-input-date" type="date" id="editDate_${r.id}" value="${r.date}">
+          <input class="edit-input edit-input-val" type="number" id="editVal_${r.id}" value="${r.value}" placeholder="m³">
+          <input class="edit-input edit-input-note" type="text" id="editNote_${r.id}" value="${r.note||""}" placeholder="${t('placeholderNote')}">
+          <button class="btn-save-edit" data-save="${r.id}">${t("btnSave")}</button>
+          <button class="btn-cancel-edit" data-canceledit="${r.id}">${t("btnCancel")}</button>
+        </div>
+        <div class="edit-err" id="editErr_${r.id}"></div>
+      </div>`;
+    }
+
+    // CONFIRM DELETE STATE
+    if (pendingDelId===r.id) {
+      return `<div class="reading-row confirm-del" data-id="${r.id}">
+        <div class="reading-dot${isLatest?" latest":""}"></div>
+        <span class="reading-date">${r.date}</span>
+        <span class="confirm-del-msg">${t("confirmDelete")}</span>
+        <button class="btn-cancel-del" data-canceldel="${r.id}">${t("btnBack")}</button>
+        <button class="btn-confirm-del" data-confirmdel="${r.id}">${t("btnDelete")}</button>
+      </div>`;
+    }
+
+    // NORMAL STATE
+    return `<div class="reading-row" style="${latestBg}" data-id="${r.id}">
+      <div class="reading-dot${isLatest?" latest":""}"></div>
+      <span class="reading-date">${r.date}</span>
+      <span class="reading-value">${r.value.toLocaleString("cs-CZ")} m³</span>
+      ${diff!==null?`<span class="reading-diff">+${diff.toFixed(1)}</span>`:""}
+      ${days!==null&&diff!==null?`<span class="reading-days">${days}d</span>`:""}
+      ${pctLabel}
+      ${r.note?`<span style="font-size:11px;color:${theme==="dark"?"#6e7681":"#6e7781"};flex:1">${r.note}</span>`:"<span style='flex:1'></span>"}
+      <button class="btn-edit" data-edit="${r.id}" title="Upravit">✏️</button>
+      <button class="btn-del" data-del="${r.id}" title="Smazat">✕</button>
+    </div>`;
+  }).join("");
+
+  // ── UPDATE STATIC i18n LABELS
+  const i18nEls=document.querySelectorAll("[data-i18n]");
+  i18nEls.forEach(el=>{ const k=el.dataset.i18n; if(T[lang][k]) el.textContent=T[lang][k]; });
+  // Upload zone
+  const upTitle=document.getElementById("uploadTitle");
+  const upDesc=document.getElementById("uploadDesc");
+  const upBadges=document.getElementById("uploadBadges");
+  const upBtn=document.getElementById("btnUploadLabel");
+  if(upTitle) upTitle.textContent=t("uploadTitle");
+  if(upDesc) upDesc.innerHTML=t("uploadDesc");
+  if(upBadges) upBadges.innerHTML=t("uploadBadges").map(b=>`<span class="upload-badge">${b}</span>`).join("");
+  if(upBtn) upBtn.textContent=t("btnUpload");
+  // Add button
+  const addBtn=document.getElementById("btnAdd");
+  if(addBtn) addBtn.textContent=t("btnAdd");
+  // Form placeholders
+  const inVal=document.getElementById("inValue");
+  if(inVal) inVal.placeholder=t("placeholderValue");
+  const inNote=document.getElementById("inNote");
+  if(inNote) inNote.placeholder=t("placeholderNote");
+
+  // ── NETATMO TAB
+  renderNetatmoTab();
+}
+
+function renderNetatmoTab() {
+  const successColor=theme==="dark"?"#34d399":"#0a8c5a";
+
+  // Coverage
+  const covWrap=document.getElementById("coverageWrap");
+  const sorted=[...readings].sort((a,b)=>new Date(a.date)-new Date(b.date));
+  if (!netatmoDays.length||sorted.length<2) { covWrap.innerHTML=""; }
+  else {
+    const bs=new Set(netatmoDays.map(d=>d.date));
+    const first=new Date(sorted[0].date), last=new Date(sorted[sorted.length-1].date);
+    const cov={}, cur=new Date(first.getFullYear(),first.getMonth(),1);
+    while (cur<=last) {
+      const y=cur.getFullYear(), m=cur.getMonth();
+      const key=`${y}-${String(m+1).padStart(2,"0")}`;
+      const dim=new Date(y,m+1,0).getDate(); let covered=0;
+      for (let d=1;d<=dim;d++) if (bs.has(`${y}-${String(m+1).padStart(2,"0")}-${String(d).padStart(2,"0")}`)) covered++;
+      cov[key]={year:y,month:m,pct:Math.round(covered/dim*100)};
+      cur.setMonth(cur.getMonth()+1);
+    }
+    const mutedColor=theme==="dark"?"#8b949e":"#57606a";
+    const warnColor=theme==="dark"?"#f59e0b":"#a16207";
+    const accentColor=theme==="dark"?"#f97316":"#d95f00";
+    const borderColor=theme==="dark"?"#30363d":"#b1bac4";
+    covWrap.innerHTML=`<div class="panel">
+      <div class="panel-header">POKRYTÍ NETATMO DAT PER MĚSÍC</div>
+      <div class="panel-body">
+        <div style="display:flex;gap:12px;margin-bottom:12px;flex-wrap:wrap">
+          ${[[successColor,"100%"],[warnColor,">50%"],[accentColor,"<50%"],[borderColor,"0%"]].map(([c,t])=>
+            `<div style="display:flex;align-items:center;gap:5px"><div style="width:10px;height:10px;background:${c};border-radius:2px"></div><span style="font-size:11px;color:${mutedColor}">${t}</span></div>`
+          ).join("")}
+        </div>
+        ${Object.entries(cov).sort().map(([key,c])=>{
+          const pct=c.pct;
+          const color=pct===100?successColor:pct>50?warnColor:pct>0?accentColor:borderColor;
+          return `<div class="cov-row">
+            <span class="cov-label">${MO_SHORT()[c.month]} ${c.year}</span>
+            <div class="cov-track"><div class="cov-fill" style="width:${pct}%;background:${color}"></div></div>
+            <span class="cov-pct" style="color:${color}">${pct}%</span>
+          </div>`;
+        }).join("")}
+        <div style="margin-top:14px;display:flex;justify-content:flex-end">
+          <button id="btnClearNetatmo" style="background:${theme==="dark"?"rgba(248,81,73,.1)":"rgba(185,28,28,.07)"};border:1px solid ${theme==="dark"?"rgba(248,81,73,.3)":"rgba(185,28,28,.25)"};border-radius:5px;color:${theme==="dark"?"#f85149":"#b91c1c"};padding:5px 12px;font-size:11px;font-family:monospace">Vymazat Netatmo data</button>
+        </div>
+      </div>
+    </div>`;
+  }
+
+  // How-to
+  const accentColor=theme==="dark"?"#f97316":"#d95f00";
+  const mutedColor=theme==="dark"?"#8b949e":"#57606a";
+  document.getElementById("howtoWrap").innerHTML=netatmoDays.length?"":
+    `<div class="panel"><div class="panel-body">
+      <p style="font-size:12px;color:${mutedColor};font-weight:600;margin-bottom:12px">Jak exportovat z Netatmo Energy:</p>
+      ${t("howtoSteps").map((s,i)=>
+        `<div style="display:flex;gap:10px;margin-bottom:8px;align-items:flex-start">
+          <div style="width:20px;height:20px;border-radius:50%;background:${accentColor};color:#fff;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0">${i+1}</div>
+          <p style="font-size:13px;color:${mutedColor};line-height:1.5">${s}</p>
+        </div>`
+      ).join("")}
+    </div></div>`;
+}
+
+// ── EVENT HANDLERS ────────────────────────────────────────────────────────────
+// Tabs
+document.querySelectorAll(".tab").forEach(btn=>{
+  btn.addEventListener("click",()=>{
+    document.querySelectorAll(".tab").forEach(b=>b.classList.remove("active"));
+    document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));
+    btn.classList.add("active");
+    document.getElementById(`screen-${btn.dataset.tab}`).classList.add("active");
+    // Redraw charts after tab becomes visible so offsetWidth is correct
+    if (btn.dataset.tab==="charts") {
+      requestAnimationFrame(()=>{
+        if (chartMode==="monthly") renderBarChart(); else renderAreaChart();
+      });
+    }
+  });
+});
+
+// Theme
+document.getElementById("themeBtn").addEventListener("click",()=>{
+  theme=theme==="dark"?"light":"dark";
+  renderAll();
+});
+
+// Unit
+document.querySelectorAll(".unit-btn").forEach(btn=>{
+  btn.addEventListener("click",()=>{
+    unit=btn.dataset.unit;
+    document.querySelectorAll(".unit-btn").forEach(b=>b.classList.remove("active"));
+    btn.classList.add("active");
+    renderAll();
+  });
+});
+
+// Chart mode
+document.querySelectorAll(".chart-mode-btn").forEach(btn=>{
+  btn.addEventListener("click",()=>{
+    chartMode=btn.dataset.mode;
+    document.querySelectorAll(".chart-mode-btn").forEach(b=>b.classList.remove("active"));
+    btn.classList.add("active");
+    renderAll();
+  });
+});
+
+// Year pills (delegated)
+document.getElementById("yearPills").addEventListener("click",e=>{
+  const y=parseInt(e.target.dataset.year);
+  if (!y) return;
+  if (visYears.includes(y)) visYears=visYears.filter(x=>x!==y);
+  else visYears=[...visYears,y].sort();
+  renderAll();
+});
+
+// Month pills (delegated)
+document.getElementById("monthPills").addEventListener("click",e=>{
+  const m=parseInt(e.target.dataset.month);
+  if (isNaN(m)) return;
+  selMonth=m;
+  renderAll();
+});
+
+// Add reading
+document.getElementById("inDate").value=new Date().toISOString().slice(0,10);
+function addReading() {
+  const errEl=document.getElementById("addErr");
+  errEl.style.display="none";
+  const date=document.getElementById("inDate").value;
+  const val=parseFloat(document.getElementById("inValue").value.replace(",","."));
+  const note=document.getElementById("inNote").value;
+  if (!date||isNaN(val)) { errEl.textContent=t("errFillAll"); errEl.style.display="block"; return; }
+  const all=[...readings,{date,value:val}].sort((a,b)=>new Date(a.date)-new Date(b.date));
+  for (let i=1;i<all.length;i++) if (all[i].value<all[i-1].value) {
+    errEl.textContent=t("errOrder"); errEl.style.display="block"; return;
+  }
+  readings.push({id:nextId++,date,value:val,note});
+  document.getElementById("inValue").value="";
+  document.getElementById("inNote").value="";
+  renderAll();
+}
+document.getElementById("btnAdd").addEventListener("click",addReading);
+document.getElementById("inValue").addEventListener("keydown",e=>e.key==="Enter"&&addReading());
+
+// Readings list — all actions delegated
+document.getElementById("readingsList").addEventListener("click",e=>{
+  const btn=e.target;
+
+  // ✕ — enter confirm mode
+  const delId=parseInt(btn.dataset.del);
+  if (delId) {
+    pendingDelId=delId; editingId=null; renderAll(); return;
+  }
+
+  // Zpět — cancel confirm
+  const cancelDel=parseInt(btn.dataset.canceldel);
+  if (cancelDel) {
+    pendingDelId=null; renderAll(); return;
+  }
+
+  // Smazat — confirmed delete
+  const confirmDel=parseInt(btn.dataset.confirmdel);
+  if (confirmDel) {
+    readings=readings.filter(r=>r.id!==confirmDel);
+    pendingDelId=null; renderAll(); return;
+  }
+
+  // ✏️ — enter edit mode
+  const editId=parseInt(btn.dataset.edit);
+  if (editId) {
+    editingId=editId; pendingDelId=null; renderAll();
+    // Focus value input after render
+    setTimeout(()=>{ const el=document.getElementById(`editVal_${editId}`); if(el){el.focus();el.select();} },50);
+    return;
+  }
+
+  // Zrušit edit
+  const cancelEdit=parseInt(btn.dataset.canceledit);
+  if (cancelEdit) {
+    editingId=null; renderAll(); return;
+  }
+
+  // ✓ Uložit edit
+  const saveId=parseInt(btn.dataset.save);
+  if (saveId) {
+    const newDate=document.getElementById(`editDate_${saveId}`).value;
+    const newVal=parseFloat(document.getElementById(`editVal_${saveId}`).value.replace(",","."));
+    const newNote=document.getElementById(`editNote_${saveId}`).value.trim();
+    const errEl=document.getElementById(`editErr_${saveId}`);
+
+    if (!newDate||isNaN(newVal)) { errEl.textContent=t("editErrFill"); errEl.style.display="block"; return; }
+
+    // Validate order — temporarily replace this reading and check sequence
+    const testList=[...readings.filter(r=>r.id!==saveId),{id:saveId,date:newDate,value:newVal}]
+      .sort((a,b)=>new Date(a.date)-new Date(b.date));
+    for (let i=1;i<testList.length;i++) {
+      if (testList[i].value<testList[i-1].value) {
+        errEl.textContent=t("editErrOrder"); errEl.style.display="block"; return;
+      }
+    }
+
+    readings=readings.map(r=>r.id===saveId?{...r,date:newDate,value:newVal,note:newNote}:r);
+    editingId=null; renderAll(); return;
+  }
+});
+
+// Save edit on Enter key in edit inputs
+document.getElementById("readingsList").addEventListener("keydown",e=>{
+  if (e.key!=="Enter") return;
+  const row=e.target.closest(".editing");
+  if (!row) return;
+  const saveId=parseInt(row.dataset.id);
+  if (saveId) document.querySelector(`[data-save="${saveId}"]`)?.click();
+});
+
+// Language toggle
+document.querySelector(".lang-toggle").addEventListener("click",e=>{
+  const l=e.target.dataset.lang;
+  if (!l||l===lang) return;
+  lang=l;
+  document.querySelectorAll(".lang-btn").forEach(b=>{
+    b.classList.toggle("active", b.dataset.lang===lang);
+  });
+  renderAll();
+});
+
+// File upload
+document.getElementById("uploadZone").addEventListener("click",()=>document.getElementById("fileInput").click());
+document.getElementById("fileInput").addEventListener("change",e=>{
+  const file=e.target.files?.[0]; if (!file) return;
+  const alertEl=document.getElementById("importAlert");
+  const reader=new FileReader();
+  reader.onload=ev=>{
+    try {
+      const res=parseNetatmoCSV(ev.target.result);
+      netatmoDays=mergeNetatmo(netatmoDays,res.days);
+      alertEl.innerHTML=`<div class="alert alert-success" style="margin-bottom:16px">
+        <strong>${t("importSuccess")}: ${file.name}</strong><br>
+        📅 ${res.dateFrom} → ${res.dateTo} &nbsp;·&nbsp; 📊 ${res.days.length} ${t("importDays")} &nbsp;·&nbsp; 🗃 ${t("importTotal")}: <strong>${netatmoDays.length} ${t("importDays")}</strong>
+      </div>`;
+      renderAll();
+    } catch(err) {
+      alertEl.innerHTML=`<div class="alert alert-error" style="margin-bottom:14px">⚠ ${err.message}</div>`;
+    }
+  };
+  reader.readAsText(file,"utf-8");
+  e.target.value="";
+});
+
+// Clear Netatmo (delegated)
+document.getElementById("coverageWrap").addEventListener("click",e=>{
+  if (e.target.id==="btnClearNetatmo") {
+    netatmoDays=[];
+    document.getElementById("importAlert").innerHTML="";
+    renderAll();
+  }
+});
+
+// Resize → redraw charts
+window.addEventListener("resize",()=>{ if(document.getElementById("screen-charts").classList.contains("active")) { if(chartMode==="monthly") renderBarChart(); else renderAreaChart(); } });
+
+// ── INIT ──────────────────────────────────────────────────────────────────────
+renderAll();
+</script>
+</body>
+</html>
