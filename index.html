@@ -576,25 +576,7 @@ const YP = {
   light: {2023:"#2563eb",2024:"#059669",2025:"#7c3aed",2026:"#d95f00"},
 };
 
-let readings = [
-  {id:1,date:"2023-01-05",value:12100},{id:2,date:"2023-01-18",value:12172},
-  {id:3,date:"2023-02-02",value:12248},{id:4,date:"2023-02-20",value:12310},
-  {id:5,date:"2023-03-08",value:12368},{id:6,date:"2023-03-27",value:12410},
-  {id:7,date:"2023-04-14",value:12445},{id:8,date:"2023-05-03",value:12463},
-  {id:9,date:"2023-09-12",value:12489},{id:10,date:"2023-10-05",value:12521},
-  {id:11,date:"2023-10-28",value:12580},{id:12,date:"2023-11-14",value:12658},
-  {id:13,date:"2023-12-20",value:12820},{id:14,date:"2024-01-06",value:12912},
-  {id:15,date:"2024-01-22",value:12988},{id:16,date:"2024-02-05",value:13055},
-  {id:17,date:"2024-02-19",value:13115},{id:18,date:"2024-03-04",value:13168},
-  {id:19,date:"2024-03-25",value:13205},{id:20,date:"2024-04-10",value:13228},
-  {id:21,date:"2024-05-08",value:13241},{id:22,date:"2024-09-10",value:13261},
-  {id:23,date:"2024-10-03",value:13288},{id:24,date:"2024-10-24",value:13340},
-  {id:25,date:"2024-11-08",value:13408},{id:26,date:"2024-11-26",value:13478},
-  {id:27,date:"2024-12-28",value:13620},{id:28,date:"2025-01-08",value:13702},
-  {id:29,date:"2025-01-22",value:13775},{id:30,date:"2025-02-05",value:13838},
-  {id:31,date:"2025-02-14",value:13878},{id:32,date:"2026-02-01",value:14100},
-  {id:33,date:"2026-02-18",value:14142},
-];
+let readings = []; // data se načtou z Supabase po přihlášení
 let nextId = 200;
 let pendingDelId = null;  // ID čekající na potvrzení smazání
 let editingId = null;     // ID právě editovaného odečtu
@@ -1342,8 +1324,11 @@ function addReading() {
   const note=document.getElementById("inNote").value;
   if (!date||isNaN(val)) { errEl.textContent=t("errFillAll"); errEl.style.display="block"; return; }
   const all=[...readings,{date,value:val}].sort((a,b)=>new Date(a.date)-new Date(b.date));
-  for (let i=1;i<all.length;i++) if (all[i].value<all[i-1].value) {
-    errEl.textContent=t("errOrder"); errEl.style.display="block"; return;
+  for (let i=1;i<all.length;i++) {
+    if (Number(all[i].value)<Number(all[i-1].value)) {
+      errEl.textContent=t("errOrder")+` (${all[i-1].date}: ${Number(all[i-1].value).toLocaleString("cs-CZ")} → ${all[i].date}: ${Number(all[i].value).toLocaleString("cs-CZ")})`; 
+      errEl.style.display="block"; return;
+    }
   }
   const newR = {id:nextId++,date,value:val,note};
   readings.push(newR);
