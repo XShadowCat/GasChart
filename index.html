@@ -115,6 +115,15 @@ body.light .btn-add{background:#d95f00;}
 .reading-row{display:flex;align-items:center;gap:8px;padding:10px 14px;border-bottom:1px solid #21262d;transition:background .25s;}
 body.light .reading-row{border-color:#d0d7de;}
 .reading-row:last-child{border-bottom:none;}
+#readingsList{scrollbar-width:thin;scrollbar-color:#30363d #0d1117;}
+#readingsList::-webkit-scrollbar{width:4px;}
+#readingsList::-webkit-scrollbar-track{background:#0d1117;}
+#readingsList::-webkit-scrollbar-thumb{background:#30363d;border-radius:2px;}
+body.light #readingsList{scrollbar-color:#b1bac4 #fff;}
+body.light #readingsList::-webkit-scrollbar-track{background:#fff;}
+body.light #readingsList::-webkit-scrollbar-thumb{background:#b1bac4;}
+.reading-row.latest-row{border-bottom-color:#21262d!important;}
+body.light .reading-row.latest-row{border-bottom-color:#d0d7de!important;}
 .reading-dot{width:7px;height:7px;border-radius:50%;background:#30363d;flex-shrink:0;}
 body.light .reading-dot{background:#b1bac4;}
 .reading-dot.latest{background:#f97316;}
@@ -361,7 +370,7 @@ body.light #loadingOverlay{background:rgba(246,248,250,.8);}
     </div>
     <div class="panel">
       <div class="panel-header"><span id="readingsCount">ODEČTY</span><span class="hint" data-i18n="hintEnter">Enter = rychlé přidání</span></div>
-      <div style="max-height:420px;overflow-y:auto;" id="readingsList"></div>
+      <div style="max-height:420px;overflow-y:auto;overscroll-behavior:contain;" id="readingsList"></div>
     </div>
   </div>
 
@@ -1151,7 +1160,7 @@ function renderAll() {
     }
 
     // NORMAL STATE
-    return `<div class="reading-row" style="${latestBg}" data-id="${r.id}">
+    return `<div class="reading-row${isLatest?" latest-row":""}" style="${latestBg}" data-id="${r.id}">
       <div class="reading-dot${isLatest?" latest":""}"></div>
       <span class="reading-date">${r.date}</span>
       <span class="reading-value">${r.value.toLocaleString("cs-CZ")} m³</span>
