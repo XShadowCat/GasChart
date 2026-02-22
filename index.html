@@ -425,16 +425,31 @@ async function loadUserData() {
 
 async function saveReading(r) {
   if (!currentUser) return;
-  await sb.from("readings").upsert({
-    id: typeof r.id === "number" ? undefined : r.id,
-    user_id: currentUser.id,
-    date: r.date, value: r.value, note: r.note||""
-  }, {onConflict: "id"});
+  const isNew = typeof r.id === "number"; // číselné = dočasné lokální ID, ještě není v DB
+  if (isNew) {
+    // INSERT — vrátí nový řádek s UUID
+    const {data, error} = await sb.from("readings").insert({
+      user_id: currentUser.id,
+      date: r.date, value: r.value, note: r.note||""
+    }).select().single();
+    if (error) { console.error("Insert error:", error); return; }
+    // Nahraď dočasné číselné ID UUID-čkem z DB
+    readings = readings.map(x => x.id === r.id ? {...x, id: data.id} : x);
+    if (pendingDelId === r.id) pendingDelId = data.id;
+    if (editingId === r.id) editingId = data.id;
+  } else {
+    // UPDATE — existující záznam s UUID
+    const {error} = await sb.from("readings").update({
+      date: r.date, value: r.value, note: r.note||""
+    }).eq("id", r.id);
+    if (error) console.error("Update error:", error);
+  }
 }
 
 async function deleteReading(id) {
-  if (!currentUser || typeof id === "number") return;
-  await sb.from("readings").delete().eq("id", id);
+  if (!currentUser || typeof id === "number") return; // číselné = jen lokální, nic v DB
+  const {error} = await sb.from("readings").delete().eq("id", id);
+  if (error) console.error("Delete error:", error);
 }
 
 async function saveNetatmoDays(days) {
@@ -1132,7 +1147,7 @@ function renderAll() {
     const latestBg=isLatest?`background:${accentColor}0a`:"";
 
     // EDITING STATE
-    if (editingId===r.id) {
+    if (editingId!==null && String(editingId)===String(r.id)) {
       return `<div class="reading-row editing" data-id="${r.id}">
         <div class="edit-row-top">
           <input class="edit-input edit-input-date" type="date" id="editDate_${r.id}" value="${r.date}">
@@ -1146,7 +1161,7 @@ function renderAll() {
     }
 
     // CONFIRM DELETE STATE
-    if (pendingDelId===r.id) {
+    if (pendingDelId!==null && String(pendingDelId)===String(r.id)) {
       return `<div class="reading-row confirm-del" data-id="${r.id}">
         <div class="reading-dot${isLatest?" latest":""}"></div>
         <span class="reading-date">${r.date}</span>
@@ -1345,43 +1360,40 @@ document.getElementById("readingsList").addEventListener("click",e=>{
   const btn=e.target;
 
   // ✕ — enter confirm mode
-  const delId=parseInt(btn.dataset.del);
+  const delId=btn.dataset.del;
   if (delId) {
     pendingDelId=delId; editingId=null; renderAll(); return;
   }
 
   // Zpět — cancel confirm
-  const cancelDel=parseInt(btn.dataset.canceldel);
-  if (cancelDel) {
+  if (btn.dataset.canceldel) {
     pendingDelId=null; renderAll(); return;
   }
 
   // Smazat — confirmed delete
-  const confirmDel=parseInt(btn.dataset.confirmdel);
+  const confirmDel=btn.dataset.confirmdel;
   if (confirmDel) {
-    const delR = readings.find(r=>r.id===confirmDel);
-    readings=readings.filter(r=>r.id!==confirmDel);
+    const delR = readings.find(r=>String(r.id)===confirmDel);
+    readings=readings.filter(r=>String(r.id)!==confirmDel);
     if (delR) deleteReading(delR.id);
     pendingDelId=null; renderAll(); return;
   }
 
   // ✏️ — enter edit mode
-  const editId=parseInt(btn.dataset.edit);
+  const editId=btn.dataset.edit;
   if (editId) {
     editingId=editId; pendingDelId=null; renderAll();
-    // Focus value input after render
     setTimeout(()=>{ const el=document.getElementById(`editVal_${editId}`); if(el){el.focus();el.select();} },50);
     return;
   }
 
   // Zrušit edit
-  const cancelEdit=parseInt(btn.dataset.canceledit);
-  if (cancelEdit) {
+  if (btn.dataset.canceledit) {
     editingId=null; renderAll(); return;
   }
 
   // ✓ Uložit edit
-  const saveId=parseInt(btn.dataset.save);
+  const saveId=btn.dataset.save;
   if (saveId) {
     const newDate=document.getElementById(`editDate_${saveId}`).value;
     const newVal=parseFloat(document.getElementById(`editVal_${saveId}`).value.replace(",","."));
@@ -1390,8 +1402,8 @@ document.getElementById("readingsList").addEventListener("click",e=>{
 
     if (!newDate||isNaN(newVal)) { errEl.textContent=t("editErrFill"); errEl.style.display="block"; return; }
 
-    // Validate order — temporarily replace this reading and check sequence
-    const testList=[...readings.filter(r=>r.id!==saveId),{id:saveId,date:newDate,value:newVal}]
+    const origR = readings.find(r=>String(r.id)===saveId);
+    const testList=[...readings.filter(r=>String(r.id)!==saveId),{id:saveId,date:newDate,value:newVal}]
       .sort((a,b)=>new Date(a.date)-new Date(b.date));
     for (let i=1;i<testList.length;i++) {
       if (testList[i].value<testList[i-1].value) {
@@ -1399,8 +1411,8 @@ document.getElementById("readingsList").addEventListener("click",e=>{
       }
     }
 
-    readings=readings.map(r=>r.id===saveId?{...r,date:newDate,value:newVal,note:newNote}:r);
-    const updR=readings.find(r=>r.id===saveId);
+    readings=readings.map(r=>String(r.id)===saveId?{...r,date:newDate,value:newVal,note:newNote}:r);
+    const updR=readings.find(r=>String(r.id)===saveId);
     if(updR) saveReading(updR);
     editingId=null; renderAll(); return;
   }
@@ -1411,7 +1423,7 @@ document.getElementById("readingsList").addEventListener("keydown",e=>{
   if (e.key!=="Enter") return;
   const row=e.target.closest(".editing");
   if (!row) return;
-  const saveId=parseInt(row.dataset.id);
+  const saveId=row.dataset.id;
   if (saveId) document.querySelector(`[data-save="${saveId}"]`)?.click();
 });
 
