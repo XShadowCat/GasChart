@@ -1075,11 +1075,11 @@ function renderAll() {
       const s=new Date(sorted[i].date), e=new Date(sorted[i+1].date);
       const dc=Math.round((e-s)/86400000); if (dc<=0) continue;
       let cov=0;
-      for (let d=0;d<dc;d++) {
+      for (let d=0;d<=dc;d++) {
         const day=new Date(s); day.setDate(s.getDate()+d);
         if (bom[day.toISOString().slice(0,10)]!==undefined) cov++;
       }
-      const pct=Math.round(cov/dc*100);
+      const pct=Math.round(cov/(dc+1)*100);
       if (pct<100) weak.push({from:sorted[i].date,to:sorted[i+1].date,dc,pct});
     }
   }
@@ -1143,11 +1143,11 @@ function renderAll() {
     let iPct=null;
     if (bom&&diff!==null&&days!==null) {
       let cov=0;
-      for (let d=0;d<days;d++) {
+      for (let d=0;d<=days;d++) {
         const day=new Date(next.date); day.setDate(new Date(next.date).getDate()+d);
         if (bom[day.toISOString().slice(0,10)]!==undefined) cov++;
       }
-      iPct=Math.round(cov/days*100);
+      iPct=Math.round(cov/(days+1)*100);
     }
     const pctColor=iPct===null?"":`color:${iPct===100?successColor:iPct>50?(theme==="dark"?"#f59e0b":"#a16207"):accentColor}`;
     const pctLabel=iPct===null?"":iPct===100?`<span class="reading-pct" style="${pctColor}">✓100%</span>`:`<span class="reading-pct" style="${pctColor}">⚠${iPct}%</span>`;
