@@ -335,6 +335,7 @@ body.light #loadingOverlay{background:rgba(246,248,250,.8);}
     <div class="chart-mode-toggle">
       <button class="chart-mode-btn active" id="btnModeMonthly" data-mode="monthly">–</button>
       <button class="chart-mode-btn" id="btnModeDaily" data-mode="daily">–</button>
+      <button class="chart-mode-btn" id="btnModeHourly" data-mode="hourly">–</button>
     </div>
     <div class="year-pills" id="yearPills"></div>
     <div class="month-pills" id="monthPills" style="display:none"></div>
@@ -707,6 +708,8 @@ const T = {
     statDays: "dní",
     // Chart
     chartMonthly: "Roční",
+    chartHourly: "Denní",
+    chartTitleHourlyPre: "Denní spotřeba kotle",
     chartDaily: "Měsíční",
     chartTitleMonthly: "Roční spotřeba",
     chartTitleDailyPre: "Měsíční spotřeba",
@@ -785,6 +788,8 @@ const T = {
     statUploadCSV: "Upload CSV",
     statDays: "days",
     chartMonthly: "Yearly",
+    chartHourly: "Daily",
+    chartTitleHourlyPre: "Daily boiler consumption",
     chartDaily: "Monthly",
     chartTitleMonthly: "Yearly consumption",
     chartTitleDailyPre: "Monthly consumption",
@@ -1001,6 +1006,108 @@ function renderAreaChart() {
     </svg>`;
 }
 
+
+// ── SVG DAILY NETATMO CHART (hodiny topení + teplota po dnech) ───────────────
+function renderDailyNetatmoChart() {
+  const container=document.getElementById("chartSvgContainer");
+  const W=container.offsetWidth||document.getElementById("chartWrap").offsetWidth-32||window.innerWidth-64;
+  const H=240, PL=48, PR=48, PT=12, PB=28;
+  const cW=W-PL-PR, cH=H-PT-PB;
+
+  // Filtruj netatmo data pro vybraný měsíc
+  const m=String(selMonth+1).padStart(2,"0");
+  const days=new Date(new Date().getFullYear(),selMonth+1,0).getDate();
+  // Najdi dostupné roky pro tento měsíc v netatmo datech
+  const mmStr=`-${m}-`;
+  const netatmoYears=[...new Set(netatmoDays.filter(x=>x.date.includes(mmStr)).map(x=>x.date.slice(0,4)))].sort();
+  // Zobraz poslední dostupný rok s daty pro tento měsíc
+  const netatmoYear=netatmoYears[netatmoYears.length-1]||String(new Date().getFullYear());
+
+  const monthData=[];
+  for (let d=1;d<=days;d++) {
+    const dayStr=`${netatmoYear}-${m}-${String(d).padStart(2,"0")}`;
+    const nd=netatmoDays.find(x=>x.date===dayStr);
+    monthData.push({d, h: nd?nd.boilerOnHours:null, t: nd?nd.avgTemp:null});
+  }
+
+  // Zkontroluj jestli máme vůbec nějaká data
+  const hasData=monthData.some(d=>d.h!==null);
+  if (!hasData) {
+    document.getElementById("chartSvgContainer").innerHTML=
+      `<div style="display:flex;align-items:center;justify-content:center;height:200px;color:${theme==="dark"?"#6e7681":"#6e7781"};font-size:13px;font-family:monospace">
+        ${lang==="cs"?"Žádná Netatmo data pro tento měsíc":"No Netatmo data for this month"}
+      </div>`;
+    return;
+  }
+
+  const maxH=Math.max(...monthData.filter(d=>d.h!==null).map(d=>d.h))*1.2;
+  const temps=monthData.filter(d=>d.t!==null).map(d=>d.t);
+  const minT=temps.length?Math.min(...temps)-0.3:18;
+  const maxT=temps.length?Math.max(...temps)+0.3:22;
+
+  const barW=Math.max(4, cW/days*0.7);
+  let bars="", tempPath="", yLeft="", yRight="", xLabels="", tempDots="";
+
+  // Y osa vlevo - hodiny topení
+  for (let i=0;i<=4;i++) {
+    const val=maxH*i/4;
+    const y=PT+cH-(cH*i/4);
+    yLeft+=`<line x1="${PL}" y1="${y}" x2="${W-PR}" y2="${y}" stroke="${theme==="dark"?"#21262d":"#e5e7eb"}" stroke-dasharray="2,4"/>`;
+    yLeft+=`<text x="${PL-6}" y="${y+4}" text-anchor="end" font-size="9" fill="${theme==="dark"?"#f97316":"#d95f00"}">${val.toFixed(1)}</text>`;
+  }
+
+  // Y osa vpravo - teplota
+  for (let i=0;i<=4;i++) {
+    const val=minT+(maxT-minT)*i/4;
+    const y=PT+cH-(cH*i/4);
+    yRight+=`<text x="${W-PR+6}" y="${y+4}" text-anchor="start" font-size="9" fill="${theme==="dark"?"#38bdf8":"#0284c7"}">${val.toFixed(1)}°</text>`;
+  }
+
+  // Sloupce + teplotní čára
+  const tpts=[];
+  monthData.forEach((d,i)=>{
+    const x=PL+(i+0.5)*cW/days;
+
+    // Sloupec
+    if (d.h!==null) {
+      const bH=(d.h/maxH)*cH;
+      const bY=PT+cH-bH;
+      const intensity=d.h/maxH;
+      const orange1=theme==="dark"?[249,115,22]:[217,95,0];
+      const orange0=theme==="dark"?[30,50,80]:[200,220,240];
+      const r=Math.round(orange0[0]+(orange1[0]-orange0[0])*intensity);
+      const g=Math.round(orange0[1]+(orange1[1]-orange0[1])*intensity);
+      const b=Math.round(orange0[2]+(orange1[2]-orange0[2])*intensity);
+      bars+=`<rect x="${(x-barW/2).toFixed(1)}" y="${bY.toFixed(1)}" width="${barW.toFixed(1)}" height="${bH.toFixed(1)}" fill="rgb(${r},${g},${b})" rx="2" opacity="0.9"/>`;
+      if (barW>14) bars+=`<text x="${x.toFixed(1)}" y="${(bY-3).toFixed(1)}" text-anchor="middle" font-size="8" fill="${theme==="dark"?"#8b949e":"#57606a"}">${d.h.toFixed(1)}</text>`;
+    }
+
+    // Teplota
+    if (d.t!==null) {
+      const ty=PT+cH-((d.t-minT)/(maxT-minT))*cH;
+      tpts.push({x,y:ty});
+      tempDots+=`<circle cx="${x.toFixed(1)}" cy="${ty.toFixed(1)}" r="2" fill="${theme==="dark"?"#38bdf8":"#0284c7"}"/>`;
+    }
+
+    // X popisky
+    if (d.d===1||d.d===days||(d.d)%5===0)
+      xLabels+=`<text x="${x.toFixed(1)}" y="${H-8}" text-anchor="middle" font-size="9" fill="${theme==="dark"?"#6e7681":"#6e7781"}">${d.d}.</text>`;
+  });
+
+  if (tpts.length>1)
+    tempPath=`<polyline points="${tpts.map(p=>`${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(" ")}" fill="none" stroke="${theme==="dark"?"#38bdf8":"#0284c7"}" stroke-width="1.5" stroke-linejoin="round"/>`;
+
+  // Popisky os
+  const labelH=Math.round(PT+cH/2);
+  const axisL=`<text x="${PL-36}" y="${labelH}" text-anchor="middle" font-size="9" fill="${theme==="dark"?"#f97316":"#d95f00"}" transform="rotate(-90,${PL-36},${labelH})">${lang==="cs"?"Topení (h)":"Heating (h)"}</text>`;
+  const axisR=`<text x="${W-PR+36}" y="${labelH}" text-anchor="middle" font-size="9" fill="${theme==="dark"?"#38bdf8":"#0284c7"}" transform="rotate(90,${W-PR+36},${labelH})">${lang==="cs"?"Teplota (°C)":"Temp (°C)"}</text>`;
+
+  document.getElementById("chartSvgContainer").innerHTML=
+    `<svg width="100%" height="${H}" viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg">
+      ${yLeft}${yRight}${bars}${tempPath}${tempDots}${xLabels}${axisL}${axisR}
+    </svg>`;
+}
+
 // ── RENDER ────────────────────────────────────────────────────────────────────
 function availableYears() {
   return [...new Set(readings.map(r=>new Date(r.date).getFullYear()))].sort();
@@ -1094,11 +1201,14 @@ function renderAll() {
   // Update chart mode button labels
   const bMonthly=document.getElementById("btnModeMonthly");
   const bDaily=document.getElementById("btnModeDaily");
+  const bHourly=document.getElementById("btnModeHourly");
   if(bMonthly) bMonthly.textContent=t("chartMonthly");
   if(bDaily) bDaily.textContent=t("chartDaily");
+  if(bHourly) bHourly.textContent=t("chartHourly");
 
-  // ── YEAR PILLS
+  // ── YEAR PILLS - skrýt pro hourly mode
   const ay=availableYears();
+  document.getElementById("yearPills").style.display=chartMode==="hourly"?"none":"";
   document.getElementById("yearPills").innerHTML=
     `<span style="font-size:10px;color:${theme==="dark"?"#6e7681":"#6e7781"};font-family:monospace;margin-right:4px">${t("labelYears")}</span>`+
     ay.map(y=>{
@@ -1108,7 +1218,7 @@ function renderAll() {
 
   // ── MONTH PILLS
   const mp=document.getElementById("monthPills");
-  if (chartMode==="daily") {
+  if (chartMode==="daily"||chartMode==="hourly") {
     mp.style.display="flex";
     mp.innerHTML=`<span style="font-size:10px;color:${theme==="dark"?"#6e7681":"#6e7781"};font-family:monospace;margin-right:4px">${t("labelMonth")}</span>`+
       MO_SHORT().map((m,i)=>`<button class="month-pill${selMonth===i?" active":""}" data-month="${i}">${m}</button>`).join("");
@@ -1117,18 +1227,28 @@ function renderAll() {
   // ── CHART
   const chartTitle=chartMode==="monthly"
     ?`${t("chartTitleMonthly")} · ${ul()}${useBoiler?" · "+t("chartBoilerOn"):" · "+t("chartLinear")}`
-    :`${t("chartTitleDailyPre")} · ${MO_LONG()[selMonth]} · ${ul()}`;
+    :chartMode==="daily"
+      ?`${t("chartTitleDailyPre")} · ${MO_LONG()[selMonth]} · ${ul()}`
+      :`${t("chartTitleHourlyPre")} · ${MO_LONG()[selMonth]}`;
   document.getElementById("chartTitle").textContent=chartTitle;
 
-  if (chartMode==="monthly") renderBarChart(); else renderAreaChart();
+  if (chartMode==="monthly") renderBarChart();
+  else if (chartMode==="daily") renderAreaChart();
+  else renderDailyNetatmoChart();
 
   // Legend
-  document.getElementById("chartLegend").innerHTML=visYears.map(y=>{
-    const c=palette[y]||"#94a3b8";
-    return chartMode==="monthly"
-      ?`<div class="legend-item"><div style="width:12px;height:12px;background:${c};border-radius:2px"></div><span style="color:${c}">${y}</span></div>`
-      :`<div class="legend-item"><div style="width:20px;height:2px;background:${c};border-radius:2px"></div><span style="color:${c}">${y}</span></div>`;
-  }).join("");
+  if (chartMode==="hourly") {
+    document.getElementById("chartLegend").innerHTML=
+      `<div class="legend-item"><div style="width:12px;height:12px;background:${theme==="dark"?"#f97316":"#d95f00"};border-radius:2px"></div><span style="color:${theme==="dark"?"#8b949e":"#57606a"}">${lang==="cs"?"Topení (h)":"Heating (h)"}</span></div>`+
+      `<div class="legend-item"><div style="width:20px;height:2px;background:${theme==="dark"?"#38bdf8":"#0284c7"};border-radius:2px"></div><span style="color:${theme==="dark"?"#8b949e":"#57606a"}">${lang==="cs"?"Teplota (°C)":"Temp (°C)"}</span></div>`;
+  } else {
+    document.getElementById("chartLegend").innerHTML=visYears.map(y=>{
+      const c=palette[y]||"#94a3b8";
+      return chartMode==="monthly"
+        ?`<div class="legend-item"><div style="width:12px;height:12px;background:${c};border-radius:2px"></div><span style="color:${c}">${y}</span></div>`
+        :`<div class="legend-item"><div style="width:20px;height:2px;background:${c};border-radius:2px"></div><span style="color:${c}">${y}</span></div>`;
+    }).join("");
+  }
 
   // Info box
   document.getElementById("infoBox").innerHTML=useBoiler
@@ -1565,7 +1685,7 @@ document.getElementById("coverageWrap").addEventListener("click",e=>{
 });
 
 // Resize → redraw charts
-window.addEventListener("resize",()=>{ if(document.getElementById("screen-charts").classList.contains("active")) { if(chartMode==="monthly") renderBarChart(); else renderAreaChart(); } });
+window.addEventListener("resize",()=>{ if(document.getElementById("screen-charts").classList.contains("active")) { if(chartMode==="monthly") renderBarChart(); else if(chartMode==="daily") renderAreaChart(); else renderDailyNetatmoChart(); } });
 
 // ── INIT ──────────────────────────────────────────────────────────────────────
 // App is initialized by Supabase auth check above (sb.auth.getSession)
