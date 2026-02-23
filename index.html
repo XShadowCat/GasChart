@@ -644,7 +644,10 @@ function getBoilerMap() {
 
 function buildDailyMap() {
   const bom=getBoilerMap();
-  const sorted=[...readings].sort((a,b)=>new Date(a.date)-new Date(b.date));
+  // Deduplikace - pokud jsou dva záznamy ve stejný den, ponech jen poslední
+  const dedupMap={};
+  for (const r of readings) dedupMap[r.date]=r;
+  const sorted=Object.values(dedupMap).sort((a,b)=>new Date(a.date)-new Date(b.date));
   const daily={};
   for (let i=0;i<sorted.length-1;i++) {
     const s=new Date(sorted[i].date), e=new Date(sorted[i+1].date);
@@ -653,6 +656,7 @@ function buildDailyMap() {
     const total=sorted[i+1].value-sorted[i].value;
     if (total<0) continue;
     const days=[];
+    // d <= dc aby byl zahrnut i poslední den intervalu (den odečtu)
     for (let d=0;d<dc;d++) {
       const day=new Date(s); day.setDate(s.getDate()+d);
       const key=day.toISOString().slice(0,10);
@@ -919,7 +923,14 @@ function renderAreaChart() {
     for (const y of visYears) {
       const m=String(selMonth+1).padStart(2,"0"), ds=`${y}-${m}-${String(d).padStart(2,"0")}`;
       if (new Date(ds).getMonth()!==selMonth) { row[y]=null; continue; }
-      const raw=dm[ds]??null;
+      let raw=dm[ds]??null;
+      // Pokud tento den nemá data ale předchozí den v měsíci měl,
+      // doplň stejnou hodnotu (prodloužení grafu do konce měsíce)
+      if (raw===null && di>0) {
+        const prevDs=`${y}-${m}-${String(d-1).padStart(2,"0")}`;
+        const prevRaw=dm[prevDs]??null;
+        if (prevRaw!==null) raw=prevRaw;
+      }
       row[y]=raw!==null?convert(raw):null;
     }
     return row;
