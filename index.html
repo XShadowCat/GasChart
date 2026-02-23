@@ -597,7 +597,7 @@ document.addEventListener("DOMContentLoaded",()=>{
 let unit = "m3";
 let theme = "dark";
 let lang = "cs";
-const APP_VERSION = "v0.39";
+const APP_VERSION = "v0.40";
 let chartMode = "monthly";
 let selMonth = 1;
 let visYears = [2024,2025,2026];
@@ -1034,20 +1034,7 @@ function renderDailyNetatmoChart() {
   // Počet dní ve správném roce (důležité pro přestupné roky a správný měsíc)
   const days=new Date(parseInt(netatmoYear),selMonth+1,0).getDate();
 
-  // Rok - stejný styl jako year pills v ročním přehledu
-  const palette=YP[theme];
   const mutedC=theme==="dark"?"#6e7681":"#6e7781";
-  let yearSel="";
-  if (netatmoYears.length>0) {
-    yearSel=`<div style="display:flex;gap:6px;align-items:center;margin-bottom:10px;font-family:monospace">
-      <span style="font-size:10px;color:${mutedC};margin-right:4px">${lang==="cs"?"ROK:":"YEAR:"}</span>
-      ${netatmoYears.map(y=>{
-        const c=palette[y]||"#94a3b8";
-        const active=y===netatmoYear;
-        return `<button class="netatmo-year-btn year-pill" data-ny="${y}" style="border-color:${c};background:${active?c:"transparent"};color:${active?"#fff":c}">${y}</button>`;
-      }).join("")}
-    </div>`;
-  }
 
   const monthData=[];
   for (let d=1;d<=days;d++) {
@@ -1060,7 +1047,6 @@ function renderDailyNetatmoChart() {
   const hasData=monthData.some(d=>d.h!==null);
   if (!hasData) {
     document.getElementById("chartSvgContainer").innerHTML=
-      yearSel+
       `<div style="display:flex;align-items:center;justify-content:center;height:200px;color:${theme==="dark"?"#6e7681":"#6e7781"};font-size:13px;font-family:monospace">
         ${lang==="cs"?"Žádná Netatmo data pro tento měsíc":"No Netatmo data for this month"}
       </div>`;
@@ -1133,7 +1119,6 @@ function renderDailyNetatmoChart() {
   const axisR=`<text x="${W-PR+36}" y="${labelH}" text-anchor="middle" font-size="9" fill="${theme==="dark"?"#38bdf8":"#0284c7"}" transform="rotate(90,${W-PR+36},${labelH})">${lang==="cs"?"Teplota (°C)":"Temp (°C)"}</text>`;
 
   document.getElementById("chartSvgContainer").innerHTML=
-    yearSel+
     `<svg width="100%" height="${H}" viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg">
       ${yLeft}${yRight}${bars}${tempPath}${tempDots}${xLabels}${axisL}${axisR}
     </svg>`;
@@ -1247,13 +1232,25 @@ function renderAll() {
 
   // ── YEAR PILLS - skrýt pro hourly mode
   const ay=availableYears();
-  document.getElementById("yearPills").style.display=chartMode==="hourly"?"none":"";
-  document.getElementById("yearPills").innerHTML=
-    `<span style="font-size:10px;color:${theme==="dark"?"#6e7681":"#6e7781"};font-family:monospace;margin-right:4px">${t("labelYears")}</span>`+
-    ay.map(y=>{
-      const c=palette[y]||"#94a3b8", active=visYears.includes(y);
-      return `<button class="year-pill" data-year="${y}" style="border-color:${c};background:${active?c:"transparent"};color:${active?"#fff":c}">${y}</button>`;
-    }).join("");
+  const yp=document.getElementById("yearPills");
+  yp.style.display="";
+  if (chartMode==="hourly") {
+    // Pro denní pohled zobraz roky dostupné v netatmo datech
+    const m2=String(selMonth+1).padStart(2,"0");
+    const nyears=[...new Set(netatmoDays.filter(x=>x.date.includes(`-${m2}-`)).map(x=>x.date.slice(0,4)))].sort();
+    const curNY=window.selNetatmoYear||nyears[nyears.length-1];
+    yp.innerHTML=`<span style="font-size:10px;color:${theme==="dark"?"#6e7681":"#6e7781"};font-family:monospace;margin-right:4px">${t("labelYears")}</span>`+
+      nyears.map(y=>{
+        const c=palette[y]||"#94a3b8", active=y===curNY;
+        return `<button class="netatmo-year-btn year-pill" data-ny="${y}" style="border-color:${c};background:${active?c:"transparent"};color:${active?"#fff":c}">${y}</button>`;
+      }).join("");
+  } else {
+    yp.innerHTML=`<span style="font-size:10px;color:${theme==="dark"?"#6e7681":"#6e7781"};font-family:monospace;margin-right:4px">${t("labelYears")}</span>`+
+      ay.map(y=>{
+        const c=palette[y]||"#94a3b8", active=visYears.includes(y);
+        return `<button class="year-pill" data-year="${y}" style="border-color:${c};background:${active?c:"transparent"};color:${active?"#fff":c}">${y}</button>`;
+      }).join("");
+  }
 
   // ── MONTH PILLS
   const mp=document.getElementById("monthPills");
