@@ -598,10 +598,15 @@ document.addEventListener("DOMContentLoaded",()=>{
 let unit = "m3";
 let theme = "dark";
 let lang = "cs";
-const APP_VERSION = "v0.45";
+const APP_VERSION = "v0.46";
 let chartMode = "monthly";
 let selMonth = 1;
-let visYears = [2024,2025,2026];
+let visYears = (()=>{
+  try {
+    const saved=localStorage.getItem("plynograf_visYears");
+    return saved?JSON.parse(saved):[2024,2025,2026];
+  } catch(e){ return [2024,2025,2026]; }
+})();
 
 // ── NETATMO PARSER ────────────────────────────────────────────────────────────
 function parseNetatmoCSV(text) {
@@ -1521,6 +1526,7 @@ document.getElementById("yearPills").addEventListener("click",e=>{
     // Multi-select pro Roční a Měsíční
     if (visYears.includes(y)) visYears=visYears.filter(x=>x!==y);
     else visYears=[...visYears,y].sort();
+    try { localStorage.setItem("plynograf_visYears", JSON.stringify(visYears)); } catch(e){}
   }
   renderAll();
 });
