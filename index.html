@@ -918,18 +918,32 @@ function renderAreaChart() {
   const cW=W-PL-PR, cH=H-PT-PB;
   const days=31;
 
+  // Pro každý rok předpočítej poslední hodnotu v daném měsíci (pro prodloužení)
+  const lastValInMonth={};
+  for (const y of visYears) {
+    const m=String(selMonth+1).padStart(2,"0");
+    let last=null;
+    for (let d=1;d<=31;d++) {
+      const ds=`${y}-${m}-${String(d).padStart(2,"0")}`;
+      if (new Date(ds).getMonth()!==selMonth) break;
+      if (dm[ds]!=null) last=dm[ds];
+    }
+    lastValInMonth[y]=last;
+  }
+
   const data=Array.from({length:days},(_,di)=>{
     const d=di+1, row={d};
     for (const y of visYears) {
       const m=String(selMonth+1).padStart(2,"0"), ds=`${y}-${m}-${String(d).padStart(2,"0")}`;
+      // Den neexistuje v tomto měsíci (např. 31. června)
       if (new Date(ds).getMonth()!==selMonth) { row[y]=null; continue; }
       let raw=dm[ds]??null;
-      // Pokud tento den nemá data ale předchozí den v měsíci měl,
-      // doplň stejnou hodnotu (prodloužení grafu do konce měsíce)
-      if (raw===null && di>0) {
-        const prevDs=`${y}-${m}-${String(d-1).padStart(2,"0")}`;
-        const prevRaw=dm[prevDs]??null;
-        if (prevRaw!==null) raw=prevRaw;
+      // Pokud tento den nemá data, hledej nejbližší předchozí hodnotu v měsíci
+      if (raw===null) {
+        for (let prev=d-1;prev>=1;prev--) {
+          const prevDs=`${y}-${m}-${String(prev).padStart(2,"0")}`;
+          if (dm[prevDs]!=null) { raw=dm[prevDs]; break; }
+        }
       }
       row[y]=raw!==null?convert(raw):null;
     }
