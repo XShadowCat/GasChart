@@ -597,7 +597,7 @@ document.addEventListener("DOMContentLoaded",()=>{
 let unit = "m3";
 let theme = "dark";
 let lang = "cs";
-const APP_VERSION = "v0.38";
+const APP_VERSION = "v0.39";
 let chartMode = "monthly";
 let selMonth = 1;
 let visYears = [2024,2025,2026];
@@ -1022,7 +1022,6 @@ function renderDailyNetatmoChart() {
 
   // Filtruj netatmo data pro vybraný měsíc
   const m=String(selMonth+1).padStart(2,"0");
-  const days=new Date(new Date().getFullYear(),selMonth+1,0).getDate();
   // Najdi dostupné roky pro tento měsíc v netatmo datech
   const mmStr=`-${m}-`;
   const netatmoYears=[...new Set(netatmoDays.filter(x=>x.date.includes(mmStr)).map(x=>x.date.slice(0,4)))].sort();
@@ -1032,14 +1031,21 @@ function renderDailyNetatmoChart() {
     window.selNetatmoYear = netatmoYears[netatmoYears.length-1]||String(new Date().getFullYear());
   const netatmoYear = window.selNetatmoYear;
 
-  // Zobraz výběr roku pokud je více roků
-  const accentC=theme==="dark"?"#f97316":"#d95f00";
+  // Počet dní ve správném roce (důležité pro přestupné roky a správný měsíc)
+  const days=new Date(parseInt(netatmoYear),selMonth+1,0).getDate();
+
+  // Rok - stejný styl jako year pills v ročním přehledu
+  const palette=YP[theme];
   const mutedC=theme==="dark"?"#6e7681":"#6e7781";
   let yearSel="";
-  if (netatmoYears.length>1) {
-    yearSel=`<div style="display:flex;gap:6px;align-items:center;margin-bottom:10px;font-size:10px;font-family:monospace">
-      <span style="color:${mutedC}">${lang==="cs"?"ROK:":"YEAR:"}</span>
-      ${netatmoYears.map(y=>`<button class="netatmo-year-btn" data-ny="${y}" style="padding:3px 10px;border-radius:5px;font-size:11px;font-weight:700;font-family:monospace;cursor:pointer;border:1px solid ${y===netatmoYear?accentC:"#30363d"};background:${y===netatmoYear?accentC:"transparent"};color:${y===netatmoYear?"#fff":mutedC}">${y}</button>`).join("")}
+  if (netatmoYears.length>0) {
+    yearSel=`<div style="display:flex;gap:6px;align-items:center;margin-bottom:10px;font-family:monospace">
+      <span style="font-size:10px;color:${mutedC};margin-right:4px">${lang==="cs"?"ROK:":"YEAR:"}</span>
+      ${netatmoYears.map(y=>{
+        const c=palette[y]||"#94a3b8";
+        const active=y===netatmoYear;
+        return `<button class="netatmo-year-btn year-pill" data-ny="${y}" style="border-color:${c};background:${active?c:"transparent"};color:${active?"#fff":c}">${y}</button>`;
+      }).join("")}
     </div>`;
   }
 
@@ -1521,6 +1527,7 @@ document.getElementById("monthPills").addEventListener("click",e=>{
   const m=parseInt(e.target.dataset.month);
   if (isNaN(m)) return;
   selMonth=m;
+  window.selNetatmoYear=null; // reset roku při změně měsíce - vybere správný rok pro nový měsíc
   renderAll();
 });
 
