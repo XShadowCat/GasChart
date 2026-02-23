@@ -589,9 +589,15 @@ let nextId = 200;
 let pendingDelId = null;  // ID čekající na potvrzení smazání
 let editingId = null;     // ID právě editovaného odečtu
 let netatmoDays = [];
+// Verze v patičce
+document.addEventListener("DOMContentLoaded",()=>{
+  const v=document.getElementById("appVersion");
+  if(v) v.textContent=APP_VERSION;
+});
 let unit = "m3";
 let theme = "dark";
 let lang = "cs";
+const APP_VERSION = "v0.34";
 let chartMode = "monthly";
 let selMonth = 1;
 let visYears = [2024,2025,2026];
@@ -1020,8 +1026,22 @@ function renderDailyNetatmoChart() {
   // Najdi dostupné roky pro tento měsíc v netatmo datech
   const mmStr=`-${m}-`;
   const netatmoYears=[...new Set(netatmoDays.filter(x=>x.date.includes(mmStr)).map(x=>x.date.slice(0,4)))].sort();
-  // Zobraz poslední dostupný rok s daty pro tento měsíc
-  const netatmoYear=netatmoYears[netatmoYears.length-1]||String(new Date().getFullYear());
+
+  // Vyber rok - použij selNetatmoYear pokud existuje a má data, jinak poslední dostupný
+  if (!window.selNetatmoYear || !netatmoYears.includes(window.selNetatmoYear))
+    window.selNetatmoYear = netatmoYears[netatmoYears.length-1]||String(new Date().getFullYear());
+  const netatmoYear = window.selNetatmoYear;
+
+  // Zobraz výběr roku pokud je více roků
+  const accentC=theme==="dark"?"#f97316":"#d95f00";
+  const mutedC=theme==="dark"?"#6e7681":"#6e7781";
+  let yearSel="";
+  if (netatmoYears.length>1) {
+    yearSel=`<div style="display:flex;gap:6px;align-items:center;margin-bottom:10px;font-size:10px;font-family:monospace">
+      <span style="color:${mutedC}">${lang==="cs"?"ROK:":"YEAR:"}</span>
+      ${netatmoYears.map(y=>`<button class="netatmo-year-btn" data-ny="${y}" style="padding:3px 10px;border-radius:5px;font-size:11px;font-weight:700;font-family:monospace;cursor:pointer;border:1px solid ${y===netatmoYear?accentC:"#30363d"};background:${y===netatmoYear?accentC:"transparent"};color:${y===netatmoYear?"#fff":mutedC}">${y}</button>`).join("")}
+    </div>`;
+  }
 
   const monthData=[];
   for (let d=1;d<=days;d++) {
@@ -1034,6 +1054,7 @@ function renderDailyNetatmoChart() {
   const hasData=monthData.some(d=>d.h!==null);
   if (!hasData) {
     document.getElementById("chartSvgContainer").innerHTML=
+      yearSel+
       `<div style="display:flex;align-items:center;justify-content:center;height:200px;color:${theme==="dark"?"#6e7681":"#6e7781"};font-size:13px;font-family:monospace">
         ${lang==="cs"?"Žádná Netatmo data pro tento měsíc":"No Netatmo data for this month"}
       </div>`;
@@ -1103,9 +1124,18 @@ function renderDailyNetatmoChart() {
   const axisR=`<text x="${W-PR+36}" y="${labelH}" text-anchor="middle" font-size="9" fill="${theme==="dark"?"#38bdf8":"#0284c7"}" transform="rotate(90,${W-PR+36},${labelH})">${lang==="cs"?"Teplota (°C)":"Temp (°C)"}</text>`;
 
   document.getElementById("chartSvgContainer").innerHTML=
+    yearSel+
     `<svg width="100%" height="${H}" viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg">
       ${yLeft}${yRight}${bars}${tempPath}${tempDots}${xLabels}${axisL}${axisR}
     </svg>`;
+
+  // Klik na rok
+  document.querySelectorAll(".netatmo-year-btn").forEach(btn=>{
+    btn.addEventListener("click",()=>{
+      window.selNetatmoYear=btn.dataset.ny;
+      renderDailyNetatmoChart();
+    });
+  });
 }
 
 // ── RENDER ────────────────────────────────────────────────────────────────────
@@ -1690,5 +1720,8 @@ window.addEventListener("resize",()=>{ if(document.getElementById("screen-charts
 // ── INIT ──────────────────────────────────────────────────────────────────────
 // App is initialized by Supabase auth check above (sb.auth.getSession)
 </script>
+<div id="appFooter" style="text-align:center;padding:12px;font-size:10px;font-family:monospace;color:#30363d;user-select:none;">
+  GasChart <span id="appVersion"></span>
+</div>
 </body>
 </html>
