@@ -597,7 +597,7 @@ document.addEventListener("DOMContentLoaded",()=>{
 let unit = "m3";
 let theme = "dark";
 let lang = "cs";
-const APP_VERSION = "v0.39";
+const APP_VERSION = "v0.42";
 let chartMode = "monthly";
 let selMonth = 1;
 let visYears = [2024,2025,2026];
@@ -1026,28 +1026,15 @@ function renderDailyNetatmoChart() {
   const mmStr=`-${m}-`;
   const netatmoYears=[...new Set(netatmoDays.filter(x=>x.date.includes(mmStr)).map(x=>x.date.slice(0,4)))].sort();
 
-  // Vyber rok - použij selNetatmoYear pokud existuje a má data, jinak poslední dostupný
-  if (!window.selNetatmoYear || !netatmoYears.includes(window.selNetatmoYear))
-    window.selNetatmoYear = netatmoYears[netatmoYears.length-1]||String(new Date().getFullYear());
-  const netatmoYear = window.selNetatmoYear;
+  // Použij visYears - zobraz data pro vybraný rok (první z visYears který má Netatmo data)
+  // Pokud vybraný rok nemá data pro tento měsíc, zobraz prázdno
+  const allNetatmoYears=[...new Set(netatmoDays.map(x=>x.date.slice(0,4)))];
+  const netatmoYear = String(visYears.find(y=>allNetatmoYears.includes(String(y)))) || String(new Date().getFullYear());
 
   // Počet dní ve správném roce (důležité pro přestupné roky a správný měsíc)
   const days=new Date(parseInt(netatmoYear),selMonth+1,0).getDate();
 
-  // Rok - stejný styl jako year pills v ročním přehledu
-  const palette=YP[theme];
   const mutedC=theme==="dark"?"#6e7681":"#6e7781";
-  let yearSel="";
-  if (netatmoYears.length>0) {
-    yearSel=`<div style="display:flex;gap:6px;align-items:center;margin-bottom:10px;font-family:monospace">
-      <span style="font-size:10px;color:${mutedC};margin-right:4px">${lang==="cs"?"ROK:":"YEAR:"}</span>
-      ${netatmoYears.map(y=>{
-        const c=palette[y]||"#94a3b8";
-        const active=y===netatmoYear;
-        return `<button class="netatmo-year-btn year-pill" data-ny="${y}" style="border-color:${c};background:${active?c:"transparent"};color:${active?"#fff":c}">${y}</button>`;
-      }).join("")}
-    </div>`;
-  }
 
   const monthData=[];
   for (let d=1;d<=days;d++) {
@@ -1060,7 +1047,6 @@ function renderDailyNetatmoChart() {
   const hasData=monthData.some(d=>d.h!==null);
   if (!hasData) {
     document.getElementById("chartSvgContainer").innerHTML=
-      yearSel+
       `<div style="display:flex;align-items:center;justify-content:center;height:200px;color:${theme==="dark"?"#6e7681":"#6e7781"};font-size:13px;font-family:monospace">
         ${lang==="cs"?"Žádná Netatmo data pro tento měsíc":"No Netatmo data for this month"}
       </div>`;
@@ -1133,18 +1119,12 @@ function renderDailyNetatmoChart() {
   const axisR=`<text x="${W-PR+36}" y="${labelH}" text-anchor="middle" font-size="9" fill="${theme==="dark"?"#38bdf8":"#0284c7"}" transform="rotate(90,${W-PR+36},${labelH})">${lang==="cs"?"Teplota (°C)":"Temp (°C)"}</text>`;
 
   document.getElementById("chartSvgContainer").innerHTML=
-    yearSel+
     `<svg width="100%" height="${H}" viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg">
       ${yLeft}${yRight}${bars}${tempPath}${tempDots}${xLabels}${axisL}${axisR}
     </svg>`;
 
   // Klik na rok
-  document.querySelectorAll(".netatmo-year-btn").forEach(btn=>{
-    btn.addEventListener("click",()=>{
-      window.selNetatmoYear=btn.dataset.ny;
-      renderDailyNetatmoChart();
-    });
-  });
+
 }
 
 // ── RENDER ────────────────────────────────────────────────────────────────────
@@ -1247,13 +1227,23 @@ function renderAll() {
 
   // ── YEAR PILLS - skrýt pro hourly mode
   const ay=availableYears();
-  document.getElementById("yearPills").style.display=chartMode==="hourly"?"none":"";
-  document.getElementById("yearPills").innerHTML=
-    `<span style="font-size:10px;color:${theme==="dark"?"#6e7681":"#6e7781"};font-family:monospace;margin-right:4px">${t("labelYears")}</span>`+
-    ay.map(y=>{
-      const c=palette[y]||"#94a3b8", active=visYears.includes(y);
-      return `<button class="year-pill" data-year="${y}" style="border-color:${c};background:${active?c:"transparent"};color:${active?"#fff":c}">${y}</button>`;
-    }).join("");
+  const yp=document.getElementById("yearPills");
+  yp.style.display="";
+  if (chartMode==="hourly") {
+    // Zobraz VŠECHNY roky dostupné v netatmo datech (ne jen pro vybraný měsíc)
+    const allNetatmoYears=[...new Set(netatmoDays.map(x=>parseInt(x.date.slice(0,4))))].sort();
+    yp.innerHTML=`<span style="font-size:10px;color:${theme==="dark"?"#6e7681":"#6e7781"};font-family:monospace;margin-right:4px">${t("labelYears")}</span>`+
+      allNetatmoYears.map(y=>{
+        const c=palette[y]||"#94a3b8", active=visYears.includes(y);
+        return `<button class="year-pill" data-year="${y}" style="border-color:${c};background:${active?c:"transparent"};color:${active?"#fff":c}">${y}</button>`;
+      }).join("");
+  } else {
+    yp.innerHTML=`<span style="font-size:10px;color:${theme==="dark"?"#6e7681":"#6e7781"};font-family:monospace;margin-right:4px">${t("labelYears")}</span>`+
+      ay.map(y=>{
+        const c=palette[y]||"#94a3b8", active=visYears.includes(y);
+        return `<button class="year-pill" data-year="${y}" style="border-color:${c};background:${active?c:"transparent"};color:${active?"#fff":c}">${y}</button>`;
+      }).join("");
+  }
 
   // ── MONTH PILLS
   const mp=document.getElementById("monthPills");
@@ -1509,6 +1499,12 @@ document.querySelectorAll(".chart-mode-btn").forEach(btn=>{
     chartMode=btn.dataset.mode;
     document.querySelectorAll(".chart-mode-btn").forEach(b=>b.classList.remove("active"));
     btn.classList.add("active");
+    if (chartMode==="hourly") {
+      // Defaultně aktivuj aktuální rok
+      const curYear=new Date().getFullYear();
+      const allNY=[...new Set(netatmoDays.map(x=>parseInt(x.date.slice(0,4))))];
+      visYears=allNY.includes(curYear)?[curYear]:[allNY[allNY.length-1]];
+    }
     renderAll();
   });
 });
@@ -1517,8 +1513,13 @@ document.querySelectorAll(".chart-mode-btn").forEach(btn=>{
 document.getElementById("yearPills").addEventListener("click",e=>{
   const y=parseInt(e.target.dataset.year);
   if (!y) return;
-  if (visYears.includes(y)) visYears=visYears.filter(x=>x!==y);
-  else visYears=[...visYears,y].sort();
+  if (chartMode==="hourly") {
+    // Radio chování - vždy jen jeden rok aktivní
+    visYears=[y];
+  } else {
+    if (visYears.includes(y)) visYears=visYears.filter(x=>x!==y);
+    else visYears=[...visYears,y].sort();
+  }
   renderAll();
 });
 
@@ -1527,7 +1528,6 @@ document.getElementById("monthPills").addEventListener("click",e=>{
   const m=parseInt(e.target.dataset.month);
   if (isNaN(m)) return;
   selMonth=m;
-  window.selNetatmoYear=null; // reset roku při změně měsíce - vybere správný rok pro nový měsíc
   renderAll();
 });
 
