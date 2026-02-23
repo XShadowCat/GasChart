@@ -1080,7 +1080,9 @@ function renderAll() {
         if (bom[day.toISOString().slice(0,10)]!==undefined) cov++;
       }
       const pct=Math.round(cov/(dc+1)*100);
-      if (pct<100) weak.push({from:sorted[i].date,to:sorted[i+1].date,dc,pct});
+      // Zobraz jen intervaly kde data částečně existují (>0% ale <100%)
+      // Intervaly s 0% = historická data bez Netatmo, ignoruj
+      if (pct>0 && pct<100) weak.push({from:sorted[i].date,to:sorted[i+1].date,dc,pct});
     }
   }
   document.getElementById("weakAlert").innerHTML=weak.length
