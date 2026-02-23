@@ -1241,9 +1241,31 @@ function renderNetatmoTab() {
     const warnColor=theme==="dark"?"#f59e0b":"#a16207";
     const accentColor=theme==="dark"?"#f97316":"#d95f00";
     const borderColor=theme==="dark"?"#30363d":"#b1bac4";
+    // Rozsah importovaných dat - první a poslední den
+    const allDates=[...bs].sort();
+    const importFrom=allDates[0];
+    const importTo=allDates[allDates.length-1];
+    // Doporučení pro příští import - den po posledním importovaném
+    const nextImportDate=new Date(importTo);
+    nextImportDate.setDate(nextImportDate.getDate()+1);
+    const nextImportStr=nextImportDate.toISOString().slice(0,10);
+
     covWrap.innerHTML=`<div class="panel">
       <div class="panel-header">POKRYTÍ NETATMO DAT PER MĚSÍC</div>
       <div class="panel-body">
+        <div style="background:${theme==="dark"?"#0d1117":"#f6f8fa"};border:1px solid ${borderColor};border-radius:6px;padding:10px 14px;margin-bottom:14px;font-size:12px;font-family:monospace">
+          <div style="display:flex;flex-wrap:wrap;gap:16px;align-items:center">
+            <div>
+              <span style="color:${mutedColor}">${lang==="cs"?"Importováno:":"Imported:"}</span>
+              <strong style="color:${theme==="dark"?"#e6edf3":"#1f2328"}"> ${importFrom} → ${importTo}</strong>
+              <span style="color:${mutedColor}"> (${allDates.length} ${lang==="cs"?"dní":"days"})</span>
+            </div>
+            <div>
+              <span style="color:${mutedColor}">${lang==="cs"?"Příští import od:":"Next import from:"}</span>
+              <strong style="color:${accentColor}"> ${nextImportStr}</strong>
+            </div>
+          </div>
+        </div>
         <div style="display:flex;gap:12px;margin-bottom:12px;flex-wrap:wrap">
           ${[[successColor,"100%"],[warnColor,">50%"],[accentColor,"<50%"],[borderColor,"0%"]].map(([c,t])=>
             `<div style="display:flex;align-items:center;gap:5px"><div style="width:10px;height:10px;background:${c};border-radius:2px"></div><span style="font-size:11px;color:${mutedColor}">${t}</span></div>`
@@ -1252,8 +1274,15 @@ function renderNetatmoTab() {
         ${Object.entries(cov).sort().map(([key,c])=>{
           const pct=c.pct;
           const color=pct===100?successColor:pct>50?warnColor:pct>0?accentColor:borderColor;
+          // Rozsah dní v měsíci který byl importován
+          const dim=new Date(c.year,c.month+1,0).getDate();
+          const mKey=`${c.year}-${String(c.month+1).padStart(2,"0")}`;
+          const mDays=[...allDates].filter(d=>d.startsWith(mKey)).sort();
+          const mFrom=mDays[0]?mDays[0].slice(8):"–";
+          const mTo=mDays[mDays.length-1]?mDays[mDays.length-1].slice(8):"–";
+          const rangeLabel=mDays.length>0?` <span style="font-size:10px;color:${mutedColor}">${parseInt(mFrom)}.–${parseInt(mTo)}.</span>`:"";
           return `<div class="cov-row">
-            <span class="cov-label">${MO_SHORT()[c.month]} ${c.year}</span>
+            <span class="cov-label">${MO_SHORT()[c.month]} ${c.year}${rangeLabel}</span>
             <div class="cov-track"><div class="cov-fill" style="width:${pct}%;background:${color}"></div></div>
             <span class="cov-pct" style="color:${color}">${pct}%</span>
           </div>`;
