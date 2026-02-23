@@ -597,7 +597,7 @@ document.addEventListener("DOMContentLoaded",()=>{
 let unit = "m3";
 let theme = "dark";
 let lang = "cs";
-const APP_VERSION = "v0.34";
+const APP_VERSION = "v0.38";
 let chartMode = "monthly";
 let selMonth = 1;
 let visYears = [2024,2025,2026];
@@ -1110,8 +1110,11 @@ function renderDailyNetatmoChart() {
       tempDots+=`<circle cx="${x.toFixed(1)}" cy="${ty.toFixed(1)}" r="2" fill="${theme==="dark"?"#38bdf8":"#0284c7"}"/>`;
     }
 
-    // X popisky
-    if (d.d===1||d.d===days||(d.d)%5===0)
+    // X popisky: 1, každý 5. den (jen pokud je >=3 dny od konce), a vždy poslední den
+    const tickSet=new Set([1]);
+    for (let td=5;td<days;td+=5) { if (days-td>=3) tickSet.add(td); }
+    tickSet.add(days);
+    if (tickSet.has(d.d))
       xLabels+=`<text x="${x.toFixed(1)}" y="${H-8}" text-anchor="middle" font-size="9" fill="${theme==="dark"?"#6e7681":"#6e7781"}">${d.d}.</text>`;
   });
 
