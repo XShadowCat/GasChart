@@ -657,7 +657,7 @@ function buildDailyMap() {
     if (total<0) continue;
     const days=[];
     // d <= dc aby byl zahrnut i poslední den intervalu (den odečtu)
-    for (let d=0;d<dc;d++) {
+    for (let d=0;d<=dc;d++) {
       const day=new Date(s); day.setDate(s.getDate()+d);
       const key=day.toISOString().slice(0,10);
       days.push({key, boiler:bom?.[key]??null});
@@ -916,27 +916,14 @@ function renderAreaChart() {
   const W=container.offsetWidth||document.getElementById("chartWrap").offsetWidth-32||window.innerWidth-64;
   const H=220, PL=48, PR=8, PT=10, PB=30;
   const cW=W-PL-PR, cH=H-PT-PB;
-  const days=31;
 
-  // Pro každý rok předpočítej poslední hodnotu v daném měsíci (pro prodloužení)
-  const lastValInMonth={};
-  for (const y of visYears) {
-    const m=String(selMonth+1).padStart(2,"0");
-    let last=null;
-    for (let d=1;d<=31;d++) {
-      const ds=`${y}-${m}-${String(d).padStart(2,"0")}`;
-      if (new Date(ds).getMonth()!==selMonth) break;
-      if (dm[ds]!=null) last=dm[ds];
-    }
-    lastValInMonth[y]=last;
-  }
+  // Skutečný počet dní ve vybraném měsíci (funguje pro libovolný rok včetně přestupných)
+  const days=new Date(new Date().getFullYear(), selMonth+1, 0).getDate();
 
   const data=Array.from({length:days},(_,di)=>{
     const d=di+1, row={d};
     for (const y of visYears) {
       const m=String(selMonth+1).padStart(2,"0"), ds=`${y}-${m}-${String(d).padStart(2,"0")}`;
-      // Den neexistuje v tomto měsíci (např. 31. června)
-      if (new Date(ds).getMonth()!==selMonth) { row[y]=null; continue; }
       let raw=dm[ds]??null;
       // Pokud tento den nemá data, hledej nejbližší předchozí hodnotu v měsíci
       if (raw===null) {
@@ -963,9 +950,10 @@ function renderAreaChart() {
     yLines+=`<text x="${PL-4}" y="${y+4}" text-anchor="end" font-size="9" fill="${theme==="dark"?"#6e7681":"#6e7781"}">${val.toFixed(2)}</text>`;
   }
 
-  // X labels
+  // X labels - dynamicky podle počtu dní v měsíci
   let xlabels="";
-  [1,5,10,15,20,25,31].forEach(d=>{
+  const xTicks=[1,5,10,15,20,25,days].filter((v,i,a)=>a.indexOf(v)===i);
+  xTicks.forEach(d=>{
     const x=PL+(d-1)/(days-1)*cW;
     xlabels+=`<text x="${x}" y="${H-8}" text-anchor="middle" font-size="9" fill="${theme==="dark"?"#6e7681":"#6e7781"}">${d}</text>`;
   });
