@@ -1458,13 +1458,46 @@ document.getElementById("fileInput").addEventListener("change",e=>{
   reader.onload=ev=>{
     try {
       const res=parseNetatmoCSV(ev.target.result);
-      netatmoDays=mergeNetatmo(netatmoDays,res.days);
-      saveNetatmoDays(res.days);
-      alertEl.innerHTML=`<div class="alert alert-success" style="margin-bottom:16px">
-        <strong>${t("importSuccess")}: ${file.name}</strong><br>
-        📅 ${res.dateFrom} → ${res.dateTo} &nbsp;·&nbsp; 📊 ${res.days.length} ${t("importDays")} &nbsp;·&nbsp; 🗃 ${t("importTotal")}: <strong>${netatmoDays.length} ${t("importDays")}</strong>
+      const mergedPreview=mergeNetatmo(netatmoDays,res.days);
+      const newDays=res.days.filter(d=>!netatmoDays.find(x=>x.date===d.date)).length;
+      const updDays=res.days.filter(d=> netatmoDays.find(x=>x.date===d.date)).length;
+      const accentC=theme==="dark"?"#f97316":"#d95f00";
+      const mutedC=theme==="dark"?"#8b949e":"#57606a";
+      // Zobraz preview s tlačítkem Potvrdit
+      alertEl.innerHTML=`<div style="background:${theme==="dark"?"#161b22":"#f6f8fa"};border:1px solid ${theme==="dark"?"#30363d":"#d0d7de"};border-radius:8px;padding:14px 16px;margin-bottom:16px">
+        <div style="font-size:13px;font-weight:700;margin-bottom:10px;color:${accentC}">
+          ${lang==="cs"?"📋 Náhled importu":"📋 Import preview"}: ${file.name}
+        </div>
+        <div style="font-size:12px;color:${mutedC};display:flex;flex-wrap:wrap;gap:12px;margin-bottom:12px">
+          <span>📅 ${res.dateFrom} → ${res.dateTo}</span>
+          <span>📊 ${res.days.length} ${lang==="cs"?"dní v souboru":"days in file"}</span>
+          <span style="color:${theme==="dark"?"#34d399":"#0a8c5a"}">✚ ${newDays} ${lang==="cs"?"nových":"new"}</span>
+          ${updDays>0?`<span style="color:${accentC}">↻ ${updDays} ${lang==="cs"?"aktualizovaných":"updated"}</span>`:""}
+          <span>🗃 ${lang==="cs"?"Po importu celkem":"Total after import"}: <strong>${mergedPreview.length} ${lang==="cs"?"dní":"days"}</strong></span>
+        </div>
+        <div style="display:flex;gap:8px">
+          <button id="btnConfirmImport" style="background:${accentC};color:#fff;border:none;border-radius:5px;padding:6px 16px;font-size:12px;font-family:monospace;font-weight:700;cursor:pointer">
+            ${lang==="cs"?"✓ Potvrdit import":"✓ Confirm import"}
+          </button>
+          <button id="btnCancelImport" style="background:transparent;border:1px solid ${theme==="dark"?"#30363d":"#d0d7de"};border-radius:5px;padding:6px 14px;font-size:12px;font-family:monospace;color:${mutedC};cursor:pointer">
+            ${lang==="cs"?"Zrušit":"Cancel"}
+          </button>
+        </div>
       </div>`;
-      renderAll();
+      // Potvrdit
+      document.getElementById("btnConfirmImport").onclick=()=>{
+        netatmoDays=mergedPreview;
+        saveNetatmoDays(res.days);
+        alertEl.innerHTML=`<div class="alert alert-success" style="margin-bottom:16px">
+          <strong>${t("importSuccess")}: ${file.name}</strong><br>
+          📅 ${res.dateFrom} → ${res.dateTo} &nbsp;·&nbsp; 📊 ${res.days.length} ${t("importDays")} &nbsp;·&nbsp; 🗃 ${t("importTotal")}: <strong>${netatmoDays.length} ${t("importDays")}</strong>
+        </div>`;
+        renderAll();
+      };
+      // Zrušit
+      document.getElementById("btnCancelImport").onclick=()=>{
+        alertEl.innerHTML="";
+      };
     } catch(err) {
       alertEl.innerHTML=`<div class="alert alert-error" style="margin-bottom:14px">⚠ ${err.message}</div>`;
     }
@@ -1476,6 +1509,10 @@ document.getElementById("fileInput").addEventListener("change",e=>{
 // Clear Netatmo (delegated)
 document.getElementById("coverageWrap").addEventListener("click",e=>{
   if (e.target.id==="btnClearNetatmo") {
+    const msg = lang==="cs"
+      ? `Opravdu chcete smazat všechna Netatmo data (${netatmoDays.length} dní)?\nRuční odečty zůstanou nedotčeny.`
+      : `Really delete all Netatmo data (${netatmoDays.length} days)?\nManual readings will not be affected.`;
+    if (!confirm(msg)) return;
     netatmoDays=[];
     clearNetatmoCloud();
     document.getElementById("importAlert").innerHTML="";
