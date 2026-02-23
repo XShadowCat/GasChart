@@ -920,10 +920,16 @@ function renderAreaChart() {
   // Skutečný počet dní ve vybraném měsíci (funguje pro libovolný rok včetně přestupných)
   const days=new Date(new Date().getFullYear(), selMonth+1, 0).getDate();
 
+  // Dnešní datum pro porovnání
+  const today=new Date(); today.setHours(0,0,0,0);
+
   const data=Array.from({length:days},(_,di)=>{
     const d=di+1, row={d};
     for (const y of visYears) {
       const m=String(selMonth+1).padStart(2,"0"), ds=`${y}-${m}-${String(d).padStart(2,"0")}`;
+      // Pokud je tento den v budoucnosti, nezobrazuj nic
+      const thisDay=new Date(`${ds}T00:00:00`);
+      if (thisDay>today) { row[y]=null; continue; }
       let raw=dm[ds]??null;
       // Pokud tento den nemá data, hledej nejbližší předchozí hodnotu v měsíci
       if (raw===null) {
