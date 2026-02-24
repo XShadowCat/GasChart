@@ -6,7 +6,7 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="theme-color" content="#010409" id="themeColor">
-<title>Plynograf 🔥</title>
+<title>Plynograf</title>
   <link rel="icon" href="icon.svg" type="image/svg+xml">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
@@ -599,7 +599,7 @@ document.addEventListener("DOMContentLoaded",()=>{
 let unit = "m3";
 let theme = "dark";
 let lang = "cs";
-const APP_VERSION = "v0.48";
+const APP_VERSION = "v0.49";
 let chartMode = "monthly";
 let selMonth = 1;
 let visYears = (()=>{
@@ -1166,7 +1166,7 @@ function renderAll() {
 
   // Theme
   document.body.className=theme==="light"?"light":"";
-  document.title=t("appName")+" 🔥";
+  document.title=t("appName");
   document.getElementById("themeBtn").textContent=theme==="dark"?"☀️":"🌙";
   document.getElementById("themeColor").content=theme==="dark"?"#010409":"#f6f8fa";
 
