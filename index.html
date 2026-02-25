@@ -595,11 +595,25 @@ let selHourlyYear = new Date().getFullYear(); // vybraný rok pro denní pohled 
 document.addEventListener("DOMContentLoaded",()=>{
   const v=document.getElementById("appVersion");
   if(v) v.textContent=APP_VERSION;
+  document.querySelectorAll(".lang-btn").forEach(b=>{
+    b.classList.toggle("active", b.dataset.lang===lang);
+  });
+  document.querySelectorAll(".unit-btn").forEach(b=>{
+    b.classList.toggle("active", b.dataset.unit===unit);
+  });
 });
 let unit = "m3";
 let theme = "dark";
 let lang = "cs";
-const APP_VERSION = "v0.51";
+try {
+  const savedTheme = localStorage.getItem("plynograf_theme");
+  if (savedTheme === "light" || savedTheme === "dark") theme = savedTheme;
+  const savedLang = localStorage.getItem("plynograf_lang");
+  if (savedLang === "cs" || savedLang === "en") lang = savedLang;
+  const savedUnit = localStorage.getItem("plynograf_unit");
+  if (savedUnit === "m3" || savedUnit === "kwh") unit = savedUnit;
+} catch(e){}
+const APP_VERSION = "v0.53";
 let chartMode = "monthly";
 let selMonth = 1;
 let visYears = (()=>{
@@ -1487,6 +1501,7 @@ document.querySelectorAll(".tab").forEach(btn=>{
 // Theme
 document.getElementById("themeBtn").addEventListener("click",()=>{
   theme=theme==="dark"?"light":"dark";
+  try { localStorage.setItem("plynograf_theme", theme); } catch(e){}
   renderAll();
 });
 
@@ -1494,6 +1509,7 @@ document.getElementById("themeBtn").addEventListener("click",()=>{
 document.querySelectorAll(".unit-btn").forEach(btn=>{
   btn.addEventListener("click",()=>{
     unit=btn.dataset.unit;
+    try { localStorage.setItem("plynograf_unit", unit); } catch(e){}
     document.querySelectorAll(".unit-btn").forEach(b=>b.classList.remove("active"));
     btn.classList.add("active");
     renderAll();
@@ -1643,6 +1659,7 @@ document.querySelector(".lang-toggle").addEventListener("click",e=>{
   const l=e.target.dataset.lang;
   if (!l||l===lang) return;
   lang=l;
+  try { localStorage.setItem("plynograf_lang", lang); } catch(e){}
   document.querySelectorAll(".lang-btn").forEach(b=>{
     b.classList.toggle("active", b.dataset.lang===lang);
   });
