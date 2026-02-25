@@ -613,7 +613,7 @@ try {
   const savedUnit = localStorage.getItem("plynograf_unit");
   if (savedUnit === "m3" || savedUnit === "kwh") unit = savedUnit;
 } catch(e){}
-const APP_VERSION = "v0.55";
+const APP_VERSION = "v0.56";
 let chartMode = "monthly";
 let selMonth = 1;
 let visYears = (()=>{
@@ -1232,7 +1232,7 @@ function renderAll() {
   }
   document.getElementById("weakAlert").innerHTML=weak.length
     ?`<div class="alert alert-warn" style="margin-bottom:14px">
-      <strong>⚠ ${weak.length} interval${weak.length>1?"y":""} s neúplnými Netatmo daty:</strong><br>
+      <strong>⚠ ${weak.length} ${weak.length>1?t("weakAlerts"):t("weakAlert")}</strong><br>
       ${weak.map(w=>`<span style="font-family:monospace;font-size:11px">${w.from} → ${w.to} · ${w.pct}%</span>`).join("<br>")}
     </div>`:"";
 
@@ -1460,7 +1460,7 @@ function renderNetatmoTab() {
           </div>`;
         }).join("")}
         <div style="margin-top:14px;display:flex;justify-content:flex-end">
-          <button id="btnClearNetatmo" style="background:${theme==="dark"?"rgba(248,81,73,.1)":"rgba(185,28,28,.07)"};border:1px solid ${theme==="dark"?"rgba(248,81,73,.3)":"rgba(185,28,28,.25)"};border-radius:5px;color:${theme==="dark"?"#f85149":"#b91c1c"};padding:5px 12px;font-size:11px;font-family:monospace">Vymazat Netatmo data</button>
+          <button id="btnClearNetatmo" style="background:${theme==="dark"?"rgba(248,81,73,.1)":"rgba(185,28,28,.07)"};border:1px solid ${theme==="dark"?"rgba(248,81,73,.3)":"rgba(185,28,28,.25)"};border-radius:5px;color:${theme==="dark"?"#f85149":"#b91c1c"};padding:5px 12px;font-size:11px;font-family:monospace">${t("btnClearNetatmo")}</button>
         </div>
       </div>
     </div>`;

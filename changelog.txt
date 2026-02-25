@@ -3,6 +3,10 @@ GasChart / Plynograf — Changelog
 
 [ ENGLISH ]
 
+v0.56 — 2026-02-25
+  - Fixed language switching: weak Netatmo interval alert and "Clear Netatmo data" button
+    now correctly translate when switching between CZ/EN
+
 v0.55 — 2026-02-25
   - Changelog reformatted: English first, Czech second
 
@@ -85,6 +89,10 @@ v0.34 — 2026-02-23
 ─────────────────────────────────
 
 [ ČESKY ]
+
+v0.56 — 2026-02-25
+  - Oprava přepínání jazyka: hláška o neúplných Netatmo datech a tlačítko
+    "Vymazat Netatmo data" se nyní správně přeloží při přepnutí CZ/EN
 
 v0.55 — 2026-02-25
   - Changelog přeformátován: nejdříve angličtina, pak čeština
