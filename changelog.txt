@@ -1,0 +1,166 @@
+GasChart / Plynograf — Changelog
+=================================
+
+[ ENGLISH ]
+
+v0.55 — 2026-02-25
+  - Changelog reformatted: English first, Czech second
+
+v0.54 — 2026-02-25
+  - Added changelog.txt to ZIP archive
+
+v0.53 — 2026-02-25
+  - Saving m³/kWh unit preference to localStorage after page refresh
+  - All three settings now restored on reload: language, theme, unit
+
+v0.52 — 2026-02-25
+  - Fixed saving of language (plynograf_lang) and theme (plynograf_theme) to localStorage
+  - Active CZ/EN button now correctly shown after page reload
+
+v0.51 — 2026-02-25
+  - Internal version, no user-facing changes
+
+v0.50 — 2026-02-25
+  - Unified orange color: logo #ed6b1d changed to #f97316 (matches UI buttons)
+
+v0.49 — 2026-02-25
+  - Logo fix: restored original SVG path data, logo now matches SVG file 1:1
+  - Removed duplicate CSS gradient background
+
+v0.48 — 2026-02-25
+  - Added favicon: <link rel="icon" href="icon.svg">
+  - Removed flame emoji 🔥 from page title
+
+v0.47 — 2026-02-24
+  - New SVG logo embedded inline on login and main screen
+  - Orange icon background via CSS linear-gradient
+
+v0.46 — 2026-02-23
+  - Stable version after daily/hourly chart completion
+  - Logo rollback from v0.47
+
+v0.45 — 2026-02-23
+  - Fixed year selection persistence: selected years saved to localStorage (visYears)
+  - Year selection restored after page refresh
+
+v0.44 — 2026-02-23
+  - Fixed tagline separator: dots replaced with middle dots ·
+
+v0.43 — 2026-02-23
+  - Added logo tagline: "Measure · Track · Save" (EN) / "Měř · Sleduj · Šetři" (CS)
+
+v0.42 — 2026-02-23
+  - Daily view: single year selection only (radio)
+  - Monthly/yearly view: multiple years selectable (multi)
+
+v0.41 — 2026-02-23
+  - Separated year selection state: daily (selHourlyYear) vs monthly/yearly (visYears)
+  - Changing year in daily view no longer affects monthly view and vice versa
+
+v0.40 — 2026-02-23
+  - Year selector in daily view shows only years with available data
+
+v0.39 — 2026-02-23
+  - Moved year selector in daily view to match position in monthly/yearly views
+
+v0.38 — 2026-02-23
+  - Added year selection in daily/hourly view (selHourlyYear)
+  - Support for data spanning two years (e.g. December 2025 + January 2026)
+
+v0.37 — 2026-02-23
+  - Further X-axis refinements for all month lengths (28–31 days)
+
+v0.36 — 2026-02-23
+  - Fixed 31-day month axis: shows 1, 5, 10, 15, 20, 25, 31 (no 30+31 overlap)
+
+v0.35 — 2026-02-23
+  - Fixed X-axis of daily chart: last day of month always shown
+  - Dynamic axis length based on days in month
+
+v0.34 — 2026-02-23
+  - Introduced version numbering (v0.xx)
+  - Version displayed in app footer
+  - ZIP files named "gaschart_vX.XX.zip"
+
+─────────────────────────────────
+
+[ ČESKY ]
+
+v0.55 — 2026-02-25
+  - Changelog přeformátován: nejdříve angličtina, pak čeština
+
+v0.54 — 2026-02-25
+  - Přidán changelog.txt do ZIP souboru
+
+v0.53 — 2026-02-25
+  - Ukládání jednotky m³/kWh (plynograf_unit) do localStorage po refreshi stránky
+  - Po refreshi se obnoví všechna tři nastavení: jazyk, téma, jednotka
+
+v0.52 — 2026-02-25
+  - Opraveno ukládání jazyka (plynograf_lang) a tématu (plynograf_theme) do localStorage
+  - Aktivní tlačítko CZ/EN se po načtení stránky správně zobrazí
+
+v0.51 — 2026-02-25
+  - Interní verze, bez změn pro uživatele
+
+v0.50 — 2026-02-25
+  - Sjednocení barvy: logo #ed6b1d změněno na #f97316 (shoduje se s UI tlačítky)
+
+v0.49 — 2026-02-25
+  - Oprava loga: obnovena původní SVG path data, logo nyní 1:1 se SVG souborem
+  - Odstraněno duplicitní CSS gradientové pozadí
+
+v0.48 — 2026-02-25
+  - Přidán favicon: <link rel="icon" href="icon.svg">
+  - Odstraněna emoji 🔥 z názvu stránky
+
+v0.47 — 2026-02-24
+  - Nové SVG logo vloženo inline na přihlašovací i hlavní obrazovce
+  - Oranžové pozadí ikonky přes CSS linear-gradient
+
+v0.46 — 2026-02-23
+  - Stabilizační verze po dokončení denního/hodinového grafu
+  - Rollback loga z v0.47
+
+v0.45 — 2026-02-23
+  - Oprava persistence výběru roků: označené roky se ukládají do localStorage (visYears)
+  - Po refreshi stránky zůstane zachován výběr roků
+
+v0.44 — 2026-02-23
+  - Oprava taglinu: tečky nahrazeny středníky ·
+
+v0.43 — 2026-02-23
+  - Přidán tagline loga: "Měř · Sleduj · Šetři" (CS) / "Measure · Track · Save" (EN)
+
+v0.42 — 2026-02-23
+  - Denní pohled: výběr vždy právě jednoho roku (radio)
+  - Měsíční/roční pohled: možnost výběru více roků najednou (multi)
+
+v0.41 — 2026-02-23
+  - Oddělení stavů výběru roku: denní (selHourlyYear) vs. měsíční/roční (visYears)
+  - Změna roku v denním pohledu neovlivňuje měsíční a naopak
+
+v0.40 — 2026-02-23
+  - Výběr roku v denním pohledu zobrazuje pouze roky s dostupnými daty
+
+v0.39 — 2026-02-23
+  - Přesunuto umístění výběru roku v denním pohledu — sladěno s ostatními pohledy
+
+v0.38 — 2026-02-23
+  - Přidán výběr roku v denním/hodinovém pohledu (selHourlyYear)
+  - Podpora dat ze dvou let (prosinec 2025 + leden 2026)
+
+v0.37 — 2026-02-23
+  - Další doladění osy X pro všechny délky měsíců (28–31 dní)
+
+v0.36 — 2026-02-23
+  - Oprava osy pro 31denní měsíc: zobrazí 1, 5, 10, 15, 20, 25, 31 (bez překryvu 30+31)
+
+v0.35 — 2026-02-23
+  - Oprava osy X denního grafu: poslední den měsíce se vždy zobrazí
+  - Dynamická délka osy podle počtu dní v měsíci
+
+v0.34 — 2026-02-23
+  - Zavedeno číslovaní verzí (v0.xx)
+  - Zobrazení verze v patičce aplikace
+  - ZIP soubory pojmenovány "gaschart_vX.XX.zip"
